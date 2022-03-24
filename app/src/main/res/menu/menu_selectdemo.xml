@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/itemPotpourri"
+        android:showAsAction="never"
+        android:title="potpourri" />
+
+    <item
+        android:id="@+id/itemColoredSquares"
+        android:showAsAction="never"
+        android:title="colored squares" />
+
+    <item
+        android:id="@+id/itemTexturedSquares"
+        android:showAsAction="never"
+        android:title="textured squares" />
+
+    <item
+        android:id="@+id/itemColoredCubes"
+        android:showAsAction="never"
+        android:title="colored cubes" />
+
+    <item
+        android:id="@+id/itemColoredCuboids"
+        android:showAsAction="never"
+        android:title="colored cuboids" />
+
+    <item
+        android:id="@+id/itemTexturedCubes"
+        android:showAsAction="never"
+        android:title="textured cubes" />
+
+    <item
+        android:id="@+id/itemColoredPolygons"
+        android:showAsAction="never"
+        android:title="colored polygons" />
+
+    <item
+        android:id="@+id/itemColoredPyramids"
+        android:showAsAction="never"
+        android:title="colored pyramids" />
+
+    <item
+        android:id="@+id/itemColoredPrisms"
+        android:showAsAction="never"
+        android:title="colored prisms" />
+
+    <item
+        android:id="@+id/itemSpheres"
+        android:showAsAction="never"
+        android:title="spheres" />
+
+    <item
+        android:id="@+id/itemCombinedShapes"
+        android:showAsAction="never"
+        android:title="combined shapes" />
+
+    <item
+        android:id="@+id/itemShapeRotation"
+        android:showAsAction="never"
+        android:title="rotating shapes" />
+
+    <item
+        android:id="@+id/itemPaths"
+        android:showAsAction="never"
+        android:title="paths" />
+
+    <item
+        android:id="@+id/itemRotationAxis"
+        android:showAsAction="never"
+        android:title="rotation around axis" />
+
+    <item
+        android:id="@+id/itemTouchReaction"
+        android:showAsAction="never"
+        android:title="touch reaction" />
+
+    <item
+        android:id="@+id/itemTest"
+        android:showAsAction="never"
+        android:title="TEST" />
+
+</menu>
