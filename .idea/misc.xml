@@ -4,10 +4,21 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/vogt/Documents/vma/programme/AndroidStudioProjects/OpenGLUtilities/app/src/main/res/menu/menu_selectdemo.xml" value="0.35" />
+        <entry key="..\:/Users/vogt/Documents/vma/programme/AndroidStudioProjects/OpenGLUtilitiesCV/app/src/main/res/layout/layout_popup_rotation.xml" value="0.34601449275362317" />
+        <entry key="..\:/Users/vogt/Documents/vma/programme/AndroidStudioProjects/OpenGLUtilitiesCV/app/src/main/res/menu/menu_advanced.xml" value="0.35208333333333336" />
+        <entry key="..\:/Users/vogt/Documents/vma/programme/AndroidStudioProjects/OpenGLUtilitiesCV/app/src/main/res/menu/menu_applications.xml" value="0.35208333333333336" />
+        <entry key="..\:/Users/vogt/Documents/vma/programme/AndroidStudioProjects/OpenGLUtilitiesCV/app/src/main/res/menu/menu_basicshapes.xml" value="0.35208333333333336" />
+        <entry key="..\:/Users/vogt/Documents/vma/programme/AndroidStudioProjects/OpenGLUtilitiesCV/app/src/main/res/menu/menu_potpourris.xml" value="0.1234375" />
+        <entry key="..\:/Users/vogt/Documents/vma/programme/AndroidStudioProjects/OpenGLUtilitiesCV/app/src/main/res/menu/menu_rotation.xml" value="0.35208333333333336" />
+        <entry key="..\:/Users/vogt/Documents/vma/programme/AndroidStudioProjects/OpenGLUtilitiesCV/app/src/main/res/menu/menu_selectdemo2.xml" value="0.33958333333333335" />
       </map>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="JavadocGenerationManager">
+    <option name="OUTPUT_DIRECTORY" value="$PROJECT_DIR$/javadoc" />
+    <option name="OPTION_SCOPE" value="private" />
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

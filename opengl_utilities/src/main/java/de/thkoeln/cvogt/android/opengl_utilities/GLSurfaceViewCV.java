@@ -11,14 +11,18 @@ package de.thkoeln.cvogt.android.opengl_utilities;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
+import android.util.Log;
 
 import java.util.ArrayList;
 
 /**
- * Class to define views on which shapes, i.e. objects of class GLShapeCV, can be rendered.
- * The rendering is done by a renderer, i.e. an object of class GLRendererCV, that is associated with the view.
- * <BR>
- * For surface views that shall react to touches, define a subclass and implement the onTouchEvent() method.
+ * Class to define views on which shapes, i.e. objects of class <I>GLShapeCV</I>, can be rendered.
+ * The rendering is done by a renderer, i.e. an object of class <I>GLRendererCV</I>, that is associated with the <I>GLSurfaceViewCV</I> object.
+ * The shapes to be rendered are stored in an <I>ArrayList</I> attribute of the <I>GLSurfaceViewCV</I> object.
+ * The renderer calls the <I>draw()</I> methods of these shapes.
+ * Shaped can be dynamically removed from and added to this list.
+ * <P>
+ * For surface views that shall react to touches, define a subclass and implement the <I>onTouchEvent()</I> method.
  * <BR>
  * @see de.thkoeln.cvogt.android.opengl_utilities.GLShapeCV
  * @see de.thkoeln.cvogt.android.opengl_utilities.GLRendererCV
@@ -72,7 +76,7 @@ public class GLSurfaceViewCV extends GLSurfaceView {
      * because it sets the 'surfaceView' attribute of the renderer.
      * @param renderer The renderer to be associated with the view.
      */
-    public void setRenderer(GLRendererCV renderer) {
+    synchronized public void setRenderer(GLRendererCV renderer) {
         super.setRenderer(renderer);
         renderer.setSurfaceView(this);
         this.renderer = renderer;
@@ -82,7 +86,7 @@ public class GLSurfaceViewCV extends GLSurfaceView {
      * Get the associated renderer.
      * @return The renderer associated with the view.
      */
-    public GLRendererCV getRenderer() {
+    synchronized public GLRendererCV getRenderer() {
         return renderer;
     }
 
@@ -91,10 +95,20 @@ public class GLSurfaceViewCV extends GLSurfaceView {
      * @param shape The shape to be added.
      */
 
-    public void addShape(GLShapeCV shape) {
+    synchronized public void addShape(GLShapeCV shape) {
         shapesToRender.add(shape);
         shape.setSurfaceView(this);
         shape.startAnimators();
+    }
+
+    /**
+     * Add some shapes that shall be rendered. This will also start the animators defined for the shapes.
+     * @param shapes The shape to be added.
+     */
+
+    synchronized public void addShapes(GLShapeCV[] shapes) {
+        for (GLShapeCV shape: shapes)
+            addShape(shape);
     }
 
     /**
@@ -102,16 +116,16 @@ public class GLSurfaceViewCV extends GLSurfaceView {
      * @return A copy of 'shapesToRender', i.e. the list of shapes to be rendered.
      */
 
-    public ArrayList<GLShapeCV> getShapesToRender() {
+    synchronized public ArrayList<GLShapeCV> getShapesToRender() {
         return (ArrayList<GLShapeCV>) shapesToRender.clone();
     }
 
     /**
-     * Removes a shape from the list of shapes to render.
+     * Remove a shape from the list of shapes to render.
      * @return A copy of 'shapesToRender', i.e. the list of shapes to be rendered.
      */
 
-    public void removeShape(GLShapeCV shape) {
+    synchronized public void removeShape(GLShapeCV shape) {
         shapesToRender.remove(shape);
     }
 
@@ -119,17 +133,17 @@ public class GLSurfaceViewCV extends GLSurfaceView {
      * Empty the list of the shapes to be rendered.
      */
 
-    public void clearShapes() {
+    synchronized public void clearShapes() {
         for (GLShapeCV shape: shapesToRender)
             shape.setSurfaceView(null);
         shapesToRender.clear();
     }
 
     /**
-     * Displays the x, y, and z axes (for testing purposes).
+     * Display the x, y, and z axes (for testing purposes).
      */
 
-    public void showAxes() {
+    synchronized public void showAxes() {
         addShape(GLShapeFactoryCV.makeAxes());
     }
 

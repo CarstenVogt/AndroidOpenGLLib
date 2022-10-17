@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/itemThisAndThat"
+        android:showAsAction="never"
+        android:title="this and that" />
+
+    <item
+        android:id="@+id/itemDrones"
+        android:showAsAction="never"
+        android:title="drones" />
+
+    <item
+        android:id="@+id/itemAirplanesRow"
+        android:showAsAction="never"
+        android:title="airplanes in a row" />
+
+    <item
+        android:id="@+id/itemAirplanesLooping"
+        android:showAsAction="never"
+        android:title="looping airplanes" />
+
+    <item
+        android:id="@+id/itemBirdFlappingWings"
+        android:showAsAction="never"
+        android:title="bird with flapping wings" />
+
+    <item
+        android:id="@+id/itemRandomSpheres"
+        android:showAsAction="never"
+        android:title="random spheres" />
+
+    <item
+        android:id="@+id/itemCubeOfCubes"
+        android:showAsAction="never"
+        android:title="cube of cubes" />
+
+    <item
+        android:id="@+id/itemTetrahedraPattern"
+        android:showAsAction="never"
+        android:title="pattern of tetrahedra" />
+
+</menu>

@@ -20,7 +20,28 @@ import android.graphics.Typeface;
 import java.util.HashMap;
 
 /**
- *  Class with Bitmap objects that can be used for texturing.
+ *  Class with some predefined <I>Bitmap</I> objects that can be used for shape texturing.
+ *  Currently these predefined bitmaps are available (the names to be used as parameter values for the static <I>get()</I> method that returns these bitmaps):
+ *  <UL>
+ *  <P><LI>"dice01": Face of a dice showing one point.
+ *  <P><LI>"dice02": Face of a dice showing two points.
+ *  <P><LI>"dice03": Face of a dice showing three points.
+ *  <P><LI>"dice04": Face of a dice showing four points.
+ *  <P><LI>"dice05": Face of a dice showing five points.
+ *  <P><LI>"dice06": Face of a dice showing six points.
+ *  <P><LI>"front":  The text "front".
+ *  <P><LI>"back":   The text "back".
+ *  <P><LI>"left":   The text "left".
+ *  <P><LI>"right":  The text "right".
+ *  <P><LI>"top":    The text "top".
+ *  <P><LI>"bottom": The text "bottom".
+ *  <P><LI>"raster": A two-dimensional raster of hexadecimal numbers.
+ *  <P><LI>"logo-thk": The TH Köln logo.
+ *  </UL>
+ *  <P>
+ *  Moreover, the class provides some utility methods.
+ *  <P>
+ *  N.B.: Before this class can be used, its static <I>init()</I> method must be called to initialize its <I>Context</I>.
  */
 
 public class TextureBitmapsCV {
@@ -46,7 +67,7 @@ public class TextureBitmapsCV {
     /** The get() method returns a Bitmap object for a name.
         If the Bitmap object has not already been stored in the internal HashMap 'textureBitmaps'
         it is created from a .bmp file and stored in 'textureBitmaps'.
-        Available names are: dice01, ..., dice06, raster, logo_thk.
+        See top of page for a list of the currently supported names.
         @param name the name of the requested Bitmap object
         @return the corresponding Bitmap object or null if there is none available for 'name' */
 
@@ -63,6 +84,12 @@ public class TextureBitmapsCV {
            case "dice04": textureBitmaps.put("dice04", BitmapFactory.decodeResource(context.getResources(), R.raw.dice04)); break;
            case "dice05": textureBitmaps.put("dice05", BitmapFactory.decodeResource(context.getResources(), R.raw.dice05)); break;
            case "dice06": textureBitmaps.put("dice06", BitmapFactory.decodeResource(context.getResources(), R.raw.dice06)); break;
+           case "front": textureBitmaps.put("front", BitmapFactory.decodeResource(context.getResources(), R.raw.front)); break;
+           case "back": textureBitmaps.put("back", BitmapFactory.decodeResource(context.getResources(), R.raw.back)); break;
+           case "left": textureBitmaps.put("left", BitmapFactory.decodeResource(context.getResources(), R.raw.left)); break;
+           case "right": textureBitmaps.put("right", BitmapFactory.decodeResource(context.getResources(), R.raw.right)); break;
+           case "top": textureBitmaps.put("top", BitmapFactory.decodeResource(context.getResources(), R.raw.top)); break;
+           case "bottom": textureBitmaps.put("bottom", BitmapFactory.decodeResource(context.getResources(), R.raw.bottom)); break;
            case "raster": textureBitmaps.put("raster", BitmapFactory.decodeResource(context.getResources(), R.raw.raster)); break;
            case "logo_thk": textureBitmaps.put("logo_thk", BitmapFactory.decodeResource(context.getResources(), R.raw.logo_thk)); break;
        }

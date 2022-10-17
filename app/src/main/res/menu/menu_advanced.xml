@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/itemCombinedShapes"
+        android:showAsAction="never"
+        android:title="combined shapes" />
+
+    <!--
+    <item
+        android:id="@+id/itemConnectingShapes"
+        android:showAsAction="never"
+        android:title="connecting shapes" />
+    -->
+
+    <item
+        android:id="@+id/itemRotationStatic"
+        android:showAsAction="never"
+        android:title="rotation - static" />
+
+    <item
+        android:id="@+id/itemRotationAnimated"
+        android:showAsAction="never"
+        android:title="rotation - animated" />
+
+    <item
+        android:id="@+id/itemPitchRollYaw"
+        android:showAsAction="never"
+        android:title="rotation - pitch roll yaw" />
+
+    <item
+        android:id="@+id/itemAlignment"
+        android:showAsAction="never"
+        android:title="rotation - alignment" />
+
+    <item
+        android:id="@+id/itemCircleAroundAxis"
+        android:showAsAction="never"
+        android:title="circle around axis" />
+
+    <item
+        android:id="@+id/itemSpiralPaths"
+        android:showAsAction="never"
+        android:title="spiral paths" />
+
+    <item
+        android:id="@+id/itemBezierCurves"
+        android:showAsAction="never"
+        android:title="Bezier curves" />
+
+    <item
+        android:id="@+id/itemBezierCurvesAligned"
+        android:showAsAction="never"
+        android:title="Bezier curves with alignment" />
+
+    <item
+        android:id="@+id/itemTouchReaction"
+        android:showAsAction="never"
+        android:title="touch reaction" />
+
+    <item
+        android:id="@+id/itemScenes"
+        android:showAsAction="never"
+        android:title="scenes" />
+
+    <item
+        android:id="@+id/itemBlocksWorld"
+        android:showAsAction="never"
+        android:title="blocks world" />
+
+</menu>

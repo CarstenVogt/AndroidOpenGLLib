@@ -20,19 +20,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 /**
- * THIS CLASS MIGHT BE USEFUL IN THE FUTURE TO EXTEND THE LIBRARIES WITH UTILITIES FOR WORKING WITH MATHEMATICAL GRAPHS OF NODES AND VERTICES.
- * IT HAS BEEN COPIED FROM THE COMPANION PROJECT FOR 2D PROPERTY ANIMATION.
- *
+ * <I>This class has been copied from a companion project for 2D animation and is currently not used yet.
+ * It might, however, be useful in the future to extend this 3D project with utilities for working with mathematical graphs consisting of nodes and vertices.</I>
+ * <P>
  * This class provides some utility methods for working with graphs, especially for displaying them on a screen.
- * A graph can be specified in two ways:<UL>
+ * A graph can be specified in two ways:
+ * <UL>
  * <LI> A HashMap: Its key set specifies the set of vertices.
  * Each key (= vertex) is mapped to a collection that specifies the adjacency list of this vertex,
  * i.e. contains all the vertices that are directly connected with the key vertex by an edge.</LI>
- * <LI> An SQLite database: It is assumed that the database includes two tables - one specifying the vertices and one specifying the edges.
+ * <P></P><LI> An SQLite database: It is assumed that the database includes two tables - one specifying the vertices and one specifying the edges.
  * The vertex table is required to have a column with primary keys of type INTEGER that uniquely identify the vertices.
  * The edge table is required to have two columns specifying the vertices belonging to the edges. The entries of these columns are foreign keys
  * of type INTEGER referring to the primary key column of the vertex table.</LI>
  * </UL>
+ * <P>
  * The methods of this class work mainly on the HashMap representation. The auxiliary method <I>generateGraphHashMapFromSQL()</I> generates the
  * HashMap representation from a given SQLite database.
  */

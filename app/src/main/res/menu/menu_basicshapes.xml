@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/itemPotpourri"
+        android:id="@+id/itemColoredTriangles"
         android:showAsAction="never"
-        android:title="potpourri" />
+        android:title="colored triangles" />
 
     <item
         android:id="@+id/itemColoredSquares"
@@ -39,56 +39,16 @@
     <item
         android:id="@+id/itemPyramidsConesTetrahedra"
         android:showAsAction="never"
-        android:title="colored pyramids" />
+        android:title="pyramids, cones, tetrahedra" />
 
     <item
         android:id="@+id/itemPrismsFrustumsCylinders"
         android:showAsAction="never"
-        android:title="prisms and frustums" />
+        android:title="prisms, frustums, cylinders" />
 
     <item
         android:id="@+id/itemSpheres"
         android:showAsAction="never"
-        android:title="spheres" />
-
-    <item
-        android:id="@+id/itemCombinedShapes"
-        android:showAsAction="never"
-        android:title="combined shapes" />
-
-    <item
-        android:id="@+id/itemConnectingShapes"
-        android:showAsAction="never"
-        android:title="connecting shapes" />
-
-    <item
-        android:id="@+id/itemShapeRotation"
-        android:showAsAction="never"
-        android:title="rotating shapes" />
-
-    <item
-        android:id="@+id/itemSpiralPaths"
-        android:showAsAction="never"
-        android:title="paths" />
-
-    <item
-        android:id="@+id/itemCircleAroundAxis"
-        android:showAsAction="never"
-        android:title="rotation around axis" />
-
-    <item
-        android:id="@+id/itemTouchReaction"
-        android:showAsAction="never"
-        android:title="touch reaction" />
-
-    <item
-        android:id="@+id/itemScenes"
-        android:showAsAction="never"
-        android:title="scenes" />
-
-    <item
-        android:id="@+id/itemTest"
-        android:showAsAction="never"
-        android:title="TEST" />
+        android:title="spheres and hemispheres" />
 
 </menu>

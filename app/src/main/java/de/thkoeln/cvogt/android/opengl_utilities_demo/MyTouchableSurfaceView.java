@@ -7,13 +7,14 @@
 // carsten.vogt@th-koeln.de
 // 17.3.2022
 
-// Program to demonstrate the functionality of the OpenGL untility package de.thkoeln.cvogt.android.opengl_utilities
+// Program to demonstrate the functionality of the OpenGL utility package de.thkoeln.cvogt.android.opengl_utilities
 
 package de.thkoeln.cvogt.android.opengl_utilities_demo;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Resources;
+import android.opengl.Matrix;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.animation.AccelerateInterpolator;
@@ -23,6 +24,7 @@ import de.thkoeln.cvogt.android.opengl_utilities.GLRendererCV;
 import de.thkoeln.cvogt.android.opengl_utilities.GLShapeCV;
 import de.thkoeln.cvogt.android.opengl_utilities.GLShapeFactoryCV;
 import de.thkoeln.cvogt.android.opengl_utilities.GLSurfaceViewCV;
+import de.thkoeln.cvogt.android.opengl_utilities.GraphicsUtilsCV;
 
 public class MyTouchableSurfaceView extends GLSurfaceViewCV {
 
@@ -55,8 +57,8 @@ public class MyTouchableSurfaceView extends GLSurfaceViewCV {
                 shape.setScale(0.9f, 0.9f, 0.9f);
                 shape.setTrans(-4 + event.getX() / 120, 6 - event.getY() / 150, -1);
                 int duration = 3000;
-                shape.setRotAxis(1,0,0);
-                GLAnimatorFactoryCV.addAnimatorRot(shape, 1800, duration, 0, false);
+                float[] axis = { 1, 0, 0 };
+                GLAnimatorFactoryCV.addAnimatorRot(shape, 1800, axis, duration, 0, false);
                 ObjectAnimator anim = GLAnimatorFactoryCV.addAnimatorTransY(shape, -10, duration, 0);
                 anim.addListener(new GLAnimatorFactoryCV.EndListenerRemove(shape,this));
                 addShape(shape);
@@ -87,7 +89,7 @@ public class MyTouchableSurfaceView extends GLSurfaceViewCV {
 */
                 baseColor = GLShapeFactoryCV.darkgrey;
                 faceColor = new float[1][];
-                float apexHeight = 10f;
+                float apexHeight = 4f;
                 faceColor[0] = GLShapeFactoryCV.red;
                 GLShapeCV shapea = GLShapeFactoryCV.makePyramid("Cone3a",16, apexHeight, baseColor, faceColor);
                 faceColor[0] = GLShapeFactoryCV.green;
@@ -106,12 +108,13 @@ public class MyTouchableSurfaceView extends GLSurfaceViewCV {
                 shape = GLShapeFactoryCV.joinShapes("shape",shape,shapee,1,1,1,90,0,0,0,apexHeight/2,-apexHeight/2);
                 shape = GLShapeFactoryCV.joinShapes("shape",shape,shapef,1,1,1,270,0,0,0,apexHeight/2,apexHeight/2,0,apexHeight/2,0);
                 counter++;
-                shape.setScale(0.12f).setTrans(-4 + event.getX() / 130, 6 - event.getY() / 150, -1);
+                shape.setScale(0.3f).setTrans(-4 + event.getX() / 130, 6 - event.getY() / 150, -1);
                 // GLAnimatorFactoryCV.addAnimatorRotX(shape, 405,duration,0, false);
                 // GLAnimatorFactoryCV.addAnimatorRotY(shape, 405,duration,0, false);
                 // GLAnimatorFactoryCV.addAnimatorTrans(shape,2.5f,-2,-5,duration,0);
-                shape.setRotAxis(0,1,0);
-                ObjectAnimator anim = GLAnimatorFactoryCV.addAnimatorRot(shape, 36000,duration,0, false);
+                // shape.setRotAxis(0,1,0);
+                float axis[] = { 0, 1, 0 };
+                ObjectAnimator anim = GLAnimatorFactoryCV.addAnimatorRot(shape, 36000,axis, duration,0, false);
                 anim.setInterpolator(new AccelerateInterpolator());
                 anim = GLAnimatorFactoryCV.addAnimatorTrans(shape,-20,50,-20,duration,0);
                 anim.setInterpolator(new AccelerateInterpolator());

@@ -1,0 +1,122 @@
+Todos / Erweiterungen:
+- Morphing = animierte Veränderung der Koordinaten einzelner Dreiecke eines Shapes
+  > Animatoren für die Klasse GLTriangleCV definieren mit Änderung der Koordinaten im Model Space
+  > mit Hilfe der Methode GLShapeCV.setTriangleVertex()
+    > eine zweite entsprechende Methode schreiben mit nur einem Parameter, die von einem ObjectAnimator aufgerufen werden kann
+  > alternativ: statt eines ObjectAnimators einen "normalen" Thread schreiben, der periodisch setTriangleVertex() aufruft
+    > siehe ApplicationsActivity.birdWithFlappingWings()
+    > hier aber: Code optimieren, so dass die Anzahl der Updates reduziert wird - siehe Kommentar zu GLShapeCV.setTriangleVertex()
+- GraphicsUtilsCV:
+  > Euler-Rotation: evtl. Reihenfolge der Rotationen ändern (zur Zeit X>Z>Y; alternativ X>Y>Z)
+- Klasse Shape:
+  > changeColor-Methode mit HashMap-Parameter, der Farben auf Farben abbildet:
+    In allen Dreiecken und Linien wird eine Key-Farbe durch die zugehörige Value-Farbe ersetzt.
+- Shapes
+  > Quadrate und Polygone mit Umrandungslinien (analog zu Dreiecken)
+  > Spiegelung von Shapes beim Kopieren
+  > Halbkugel mit Bodenfläche
+  > Das Primitive "Point" hinzufügen
+    > Erweiterung: Gruppen von Points, deren Koordinaten und Farbwerte in einem einzigen Buffer hintereinander gespeichert sind
+      (siehe Brothaler, OpenGL ES 2 for Android, p. 193 ff)
+  > Info-Attribut einer Klasse ShapeInfo hinzufügen
+    > insbes. String für Typ des Shapes (Cube, Pyramid), Volumen, ...
+  > Texturen für Pyramiden, Prismen, Kugeln
+  > Beschriftungen aus Strings dynamisch generieren
+  > Zweistufige Definition der Dreiecke: 1.) Array mit allen Vertices des Shapes 2.) Definition der Dreiecke durch Indizes dieses Arrays
+  > Triangle Fans, Triangle Strips: Klasse GLShapeCV entsprechend erweitern
+  > Speicher- und Zeitkomplexität reduzieren
+    > z.B. Spheres: Dreiecke/Dreieckskoordinaten nach erstmaliger Berechnung cachen, bei Erzeugung weiterer Kugeln darauf zugreifen
+                    (Beschleunigung ist allerdings nicht übermäßig groß, z.B. 124 ms ggü. 167 ms)
+    > z.B. Triangles: nicht Farbdefinition selbst speichern, sondern Referenz darauf
+- Zusammenstellen von Shapes und Szenen mit mehreren Shapes
+  > per Drag&Drop
+  > joinShapes():
+    > in der Klasse GLShapeCV ein neues Attribut componentShapes einführen
+      > dort die Shapes speichern, aus denen der neue Shape zusammengesetzt wird
+      > somit: Shape kann später wieder in seine Einzelteile zerlegt werden,
+         die dann wieder einzeln animiert werden können etc.
+    > Ausführungszeit beschleunigen!!
+    > nicht sichtbare und doppelte Dreiecke löschen
+  > Aneinander"kleben" zweier Shapes bei bestimmten Dreiecken / Flächen
+    > z.B. zwei Tetraeder an ihren Basisdreiecken: Aufbau komplexer Shapes aus Tetraedern
+      > Dazu Koordinatensystem im 3D-Raum für gepackte Tetraeder festlegen
+      > Ansatz zunächst: "Sägezahnmuster" von Tetraedern, deren Basisdreiecke gepackt in der x-y-Ebene liegen
+        (siehe ApplicationsActivity > initTetrahedraPattern())
+    > zur Effizienzsteigerung: Zusammenfassung der Koordinaten und Farbwerte in einem einzigen Buffer mit einem einzigen Shader-Aufruf
+      (siehe Brothaler, OpenGL ES 2 for Android, p. 193 ff)
+  > Klötzchenwelt mit Würfeln oder/und Tetraedern
+    > entsprechendes Koordinatensystem
+    > dynamisches Hinzufügen weiterer Elemente
+      > Animation mit Kürzeste-Wege-Algorithmus
+    > Culling zur Effizienzsteigerung ??
+    > siehe z.B. prototypische Methode initCubeConsistingOfFourTetrahedra() in OthersActivity.java, Module app.
+  > auch möglich: Aufbau von Szenen / Figuren aus einzelnen Points, deren Koordinaten und Farbwerte in einem einzigen Buffer hintereinander gespeichert sind
+    > Brothaler, OpenGL ES 2 for Android, p. 193 ff ("Particles")
+- in GLShapeFactoryCV.joinShapes() das Zentrum (d.h. Modellkoordinate (0,0,0)) automatisch setzen:
+    z.B. Mittelwert aller Eckpunkte nehmen
+    oder als Mittel der Schwerpunkte der einzelnen Shapes gewichtet mit deren Volumina
+- Shader für Shapes, in denen alle Dreiecke dieselbe einheitliche Farbe und keinen Farbverlauf haben
+  > Zeitersparnis ??? (siehe Kommentar in GLPlatformCV)
+- Zeichnen effizienter gestalten, um Szenen mit vielen Shapes ruckelfrei darstellen zu können
+  > Erkenntnisse:
+    > Die Ausführungsdauer von onDrawFrame() des GLRendererCV hängt wesentlich von der Anzahl der GLShapeCV-Objekte und damit der OpenGL-Programme ab,
+      nicht jedoch von der Anzahl der Triangles.
+      (festgestellt durch Vergleich zwischen 8000 einzelnen Würfel-Shapes mit insgesamt 12 Triangles pro Shape [Dauer ca. 220-230 ms]
+       und mit einem einzigen Shape, der alle 96000 Triangles umfasst [Dauer ca. 2-5 ms]).
+      weitere Detailangaben zu Zeitmessungen siehe Kommentare in GLShapeCV.draw()
+    > Dagegen nur relativ geringe Zeitersparnis durch Verzicht auf Animationen und die ständige Neuberechnung der MVP-Matrix [obiges Szenario mit 8000 Würfeln: onDrawFrame() ca. 150-160ms])
+  > Lösungsmöglichkeit 1: (wenn mehrere/alle Shapes dieselben Modell-Eckkoordinaten und Farben haben)
+    > im Renderer: für alle Shapes OpenGL-Programm einmalig vorbereiten, Werte einmalig an VBOs übergeben
+    > in den draw()-Operationen der einzelnen Shapes: auf die VBOs jeweils die Shape-spezifischen MVP-Matrizen anwenden
+    > insbesondere anwendbar in der Klötzchenwelt (siehe unten)
+  > Lösungsmöglichkeit 2 (?): Werte aller Shapes in einem einzigen Satz von Buffern (vertexBuffer, ...) zusammentragen und dann ein einziges OpenGL-Programm ausführen.
+    > Frage: Wie wendet man hier die individuellen MVP-Matrizen der einzelnen Shapes an?
+- Effizienz des Umgangs mit Textures prüfen
+  > einmal erzeugen und dann von mehreren Shapes aus zugreifen?
+- GLAnimatorFactoryCV ausbauen
+  > weitere Path-Animatoren, bei denen der Shape jeweils an der Bewegungsrichtung ausgerichtet wird
+    > siehe dazu der Bezier-Animator
+  > u.a. Berechnungsfunktionen für Wege etc. aus PropAnimUtils übernehmen
+  > auch Kollisionserkennung
+  > verallgemeinerter Spiral-Animator: nicht nur Spirale entlang der Achse (= Pfade einer Schraube), sondern auch Spirale auf die Achse zu.
+  > Physics-based animation: Feder, Reibung ("Fling"), Pendel
+  > Rotation nicht unbedingt um den Nullpunkt im Koordinatensystem des Shapes, sondern um einen explizit festgelegten anderen Punkt
+  > Implementierung der Positionsberechung in OpenGL-Code im Vertex Shader -> gesteigerte Effizienz durch Ausführung in der GPU
+    > Brothaler, OpenGL ES 2 for Android, p. 193 ff
+- GLSceneFactoryCV ausbauen
+- Animator-Programmierung grundlegend ändern, im Sinne der OOP
+  (d.h. als Alternative/Ersatz zu den statischen GLAnimatorFactory-Methoden)
+  > Klasse GLAnimatorCV als Unterklasse von ObjectAnimator definieren
+  > von dieser Klasse weitere Unterklassen definieren: GLPathAnimatorCV, GLRotationAnimatorCV usw.
+    > Kontruktoren dieser Klassen entsprechend den statischen GLAnimatorFactory-Methoden
+  > im Konstruktor wird das animierte GLShapeCV-Objekt noch nicht festgelegt
+    sondern erst später, wenn der Animator mit addAnimator() einem Shape hinzugefügt wird
+    > dies durch Aufruf der ObjectAnimator-Methode setTarget() innerhalb von GLShapeCV.addAnimator()
+  > Benutzung dann z.B.: myShape.addAnimator(new GLPathAnimatorCV(...));
+- Kamerafahrt: dynamische Änderung der ViewMatrix
+  > z.B. durch Thread mit folgender run()-Methode:
+           public void run() {
+               while (true) {
+                  surfaceView.getRenderer().setViewMatrixValues(....);
+                  ... Update von Werten, die an setViewMatrixValues() übergeben werden ...
+                  try {
+                      Thread.currentThread().sleep(...);
+                  } catch (Exception e) {}
+               }
+           }
+  > siehe TestActivity > initTestDynamicViewMatrix()
+- Berührungen
+  > Erkennen, welcher Shape berührt wurde ("Picking"):
+    https://en.wikibooks.org/wiki/OpenGL_Programming/Object_selection
+    http://www.opengl-tutorial.org/miscellaneous/clicking-on-objects/picking-with-an-opengl-hack/
+    https://ogldev.org/www/tutorial29/tutorial29.html
+    Brothaler, OpenGL ES 2 for Android, p. 168 ff
+- Beleuchtung
+  > Directional Light (z.B. Sonnenlicht): Brothaler, OpenGL ES 2 for Android, p. 255 ff
+  > Ambient Light (Umgebungslicht): Brothaler, OpenGL ES 2 for Android, p. 263/64
+  > Point Light (Lichtquelle): Brothaler, OpenGL ES 2 for Android, p. 264 ff
+- Import von Modellen: https://learnopengl.com/Model-Loading/Model
+- GLPlatformCV:
+  > weitere plattformnahe Operationen dorthin übertragen (z.B. Füllen der Puffer?)
+
+

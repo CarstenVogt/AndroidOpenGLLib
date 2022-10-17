@@ -7,7 +7,7 @@
 // carsten.vogt@th-koeln.de
 // 17.3.2022
 
-// Program to demonstrate the functionality of the OpenGL untility package de.thkoeln.cvogt.android.opengl_utilities
+// Program to demonstrate the functionality of the OpenGL utility package de.thkoeln.cvogt.android.opengl_utilities
 
 package de.thkoeln.cvogt.android.opengl_utilities_demo;
 

@@ -5,33 +5,39 @@
 // Technische Hochschule Köln, Germany
 // Fakultät für Informations-, Medien- und Elektrotechnik
 // carsten.vogt@th-koeln.de
-// 17.3.2022
+// 4.10.2022
 
 package de.thkoeln.cvogt.android.opengl_utilities;
 
 import android.graphics.Bitmap;
 import android.opengl.Matrix;
+import android.util.Log;
 
 /**
- * Class to specify triangles, the fundamental building units of OpenGL shapes.
- * Shapes, i.e. objects of class GLShapeCV are defined by a set of triangles, i.e. of objects of this class GLTriangleCV.
- * <BR>
- * The form of a triangle is specified by its three vertices as defined by the 'vertices' attribute.
- * <BR>
+ * Class to specify triangles, i.e. fundamental building units of OpenGL shapes.
+ * Shapes, i.e. objects of class <I>GLShapeCV</I> are defined by a set of triangles and/or lines, i.e. of objects of this class <I>GLTriangleCV</I> and/or of class <I>GLLineCV</I>.
+ * <P>
+ * The form of a triangle is specified by its three vertices as defined by the <I>vertices</I> attribute.
+ * <P>
  * There are three ways to specify the color values of the individual pixels of a triangle:
  * <UL>
- * <LI>by a uniform color for the whole triangle,
- * <LI>by a color gradient where pixel colors are interpolated from the colors of the three vertices [NOT YET SUPPORTED] or
- * <LI>by a texture as defined by a bitmap image.
+ * <P><LI>by a uniform color for the whole triangle,
+ * <P><LI>by a color gradient where pixel colors are interpolated from the colors of the three vertices or
+ * <P><LI>by a texture as defined by a bitmap image.
  * </UL>
- * The following attributes support these options and override each others in the given order:
+ * <P>The following attributes support these options and override each others in the given order:
  * <UL>
- * <LI>If the attribute 'uniformColor' is not null, it specifies the uniform color of the triangle.
- * <LI>If the attribute 'uniformColor' is null and the attribute 'vertexColors' is not, a color gradient is used as defined by the vertex colors [NOT YET SUPPORTED].
- * <LI>If the attributes 'uniformColor' and 'vertexColors' are both null, a bitmap will be applied as a texture,
- * as defined by the attributes 'textureBitmap' and 'uvCoordinates'.
+ * <P><LI>If the attribute <I>uniformColor</I> is not null, it specifies the uniform color of the triangle.
+ * <P><LI>If the attribute <I>uniformColor</I> is null and the attribute <I>vertexColors</I> is not, a color gradient is used as defined by the vertex colors.
+ * <P><LI>If the attributes <I>uniformColor</I> and <I>vertexColors</I> are both null, a bitmap will be applied as a texture,
+ * as defined by the attributes <I>textureBitmap</I> and <I>uvCoordinates</I>.
  * </UL>
+ * Note the difference between (1) an object of this class <I>GLTriangleCV</I> and (2) an object of class <I>GLShapeCV</I> that contains a single triangle,
+ * as produced by GLShapeFactory.makeTriangle():
+ * (1) is used as an interior component of a <I>GLShapeCV</I> object and hence cannot be directly drawn on the display.
+ * To display single triangles, use objects of type (2).
  * @see de.thkoeln.cvogt.android.opengl_utilities.GLShapeCV
+ * @see GLLineCV
  */
 
 public class GLTriangleCV {
@@ -184,13 +190,27 @@ public class GLTriangleCV {
     } */
 
     /**
+     * Sets the values of a triangle vertex as a copy of the parameter array.
+     * @param vertexNo The number of the vertex to be set (0, 1, or 2).
+     * @param values The values for the vertex (x, y, and z coordinate).
+     * @return false if one of the parameters is not correct.
+     */
+
+    public boolean setVertex(int vertexNo, float[] values) {
+        if (vertexNo<0||vertexNo>2||values==null||values.length!=3) return false;
+        for (int i=0; i<3; i++)
+            this.vertices[vertexNo][i] = values[i];
+        return true;
+    }
+
+    /**
      * Sets the vertices of the triangle as an in-depth copy of the parameter array.
      * @param vertices The vertices to be set.
      * @return false if the parameter array has not the correct size (3 in both dimensions).
      */
 
     public boolean setVertices(float[][] vertices) {
-        if (vertices.length!=3) return false;
+        if (vertices==null||vertices.length!=3) return false;
         for (int i=0; i<3; i++) {
             if (vertices[i].length!=3) return false;
             for (int j=0; j<3; j++)
@@ -277,7 +297,7 @@ public class GLTriangleCV {
 
     public int getColoringType()  {     // coloring types as defined in GLPlatformCV
         if (uniformColor!=null) return GLPlatformCV.COLORING_UNIFORM;
-        if (vertexColors!=null) return GLPlatformCV.COLORING_GRADIENT;
+        if (vertexColors!=null) return GLPlatformCV.COLORING_VARYING;
         if (textureBitmap!=null) return GLPlatformCV.COLORING_TEXTURED;
         return GLPlatformCV.COLORING_UNDEF;
     }
@@ -334,7 +354,7 @@ public class GLTriangleCV {
 
     public float[] getVertexColor(int vertexNo) {
         if (vertexNo<0||vertexNo>2) return null;
-        if (getColoringType()!= GLPlatformCV.COLORING_UNIFORM&&getColoringType()!= GLPlatformCV.COLORING_GRADIENT) return null;
+        if (getColoringType()!= GLPlatformCV.COLORING_UNIFORM&&getColoringType()!= GLPlatformCV.COLORING_VARYING) return null;
         if (getColoringType()== GLPlatformCV.COLORING_UNIFORM) {
             return uniformColor.clone();
         }
@@ -427,7 +447,7 @@ public class GLTriangleCV {
      * i.e. in the coordinate system of the shape to which the triangle belongs or is to be added.
      * By this, a triangle can be placed within this shape.
      * Similar methods of shapes (see class GLShapeCV: setTransX(), setRotAroundX(), ...)
-     * do not modify the vertex coordinates of the shape's triangles
+     * do not modify the vertex coordinates of the shape's triangles and lines
      * but define a model matrix which places the whole shape into the "real world".
      * @param scaleX The scale factor for the x dimension.
      * @param scaleY The scale factor for the y dimension.
