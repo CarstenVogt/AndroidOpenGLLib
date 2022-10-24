@@ -297,8 +297,8 @@ public class ApplicationsActivity extends Activity {
 
     public void airplanesRow(GLSurfaceViewCV surfaceView) {
         surfaceView.clearShapes();
-        final int numberOfPlanes = 12;
-        for (int i = 0; i < numberOfPlanes; i++) {
+        final int numberOfJetplanes = 12;
+        for (int i = 0; i < numberOfJetplanes; i++) {
             float[][] colors = new float[2][];
             switch (i % 3) {
                 case 0:
@@ -346,51 +346,75 @@ public class ApplicationsActivity extends Activity {
             translationArray[4][1] = 0.25f*lengthFuselage;
             GLShapeCV airplane = GLShapeFactoryCV.joinShapes("Airplane",airplaneParts,rotationArray,translationArray,0);
             */
-            GLShapeCV airplane = GLShapeFactoryCV.makeAirplane(colors[0], colors[1]);
-            airplane.setScale(.4f);
+            GLShapeCV jetplane = GLShapeFactoryCV.makeJetAirplane("Plane "+i,colors[0], colors[1]);
+            jetplane.setScale(.4f);
             float[] origin = {-19, 16, -25};
             float[] target = {12, -12, -3};
             float[] vector = new float[3];
             for (int j=0;j<3;j++)
                 vector[j] = target[j]-origin[j];
-            airplane.alignWith(2,vector,true,0);
+            jetplane.alignWith(2,vector,true,0);
             // airplane.setRotationByEulerAngles(-50, 140, 0);
-            airplane.setTrans(origin);
-            ObjectAnimator anim = GLAnimatorFactoryCV.addAnimatorTrans(airplane, target, 10000, 0);
+            jetplane.setTrans(origin);
+            ObjectAnimator anim = GLAnimatorFactoryCV.addAnimatorTrans(jetplane, target, 10000, 0);
             anim.setStartDelay(i * 1000);
             ObjectAnimator anim2 = null;
-            switch (3 * i / numberOfPlanes) {
+            switch (3 * i / numberOfJetplanes) {
                 case 0:
-                    anim2 = GLAnimatorFactoryCV.addAnimatorPitch(airplane, 30, 2000, 5);
+                    anim2 = GLAnimatorFactoryCV.addAnimatorPitch(jetplane, 30, 2000, 5);
                     break;
                 case 1:
-                    anim2 = GLAnimatorFactoryCV.addAnimatorRoll(airplane, 30, 2000, 5);
+                    anim2 = GLAnimatorFactoryCV.addAnimatorRoll(jetplane, 30, 2000, 5);
                     break;
                 case 2:
-                    anim2 = GLAnimatorFactoryCV.addAnimatorYaw(airplane, 30, 2000, 5);
+                    anim2 = GLAnimatorFactoryCV.addAnimatorYaw(jetplane, 30, 2000, 5);
                     break;
             }
             anim2.setStartDelay(i * 1000);
-            surfaceView.addShape(airplane);
+            surfaceView.addShape(jetplane);
+        }
+        final int numberOfPropellerplanes = 4;
+        for (int i = 0; i < numberOfPropellerplanes; i++) {
+            GLShapeCV propellerplane = GLShapeFactoryCV.makePropellerAirplane("Propeller Plane", 10000, 30);
+            float[] origin = {-6, -3, -3};
+            float[] target = {20, 24, -25};
+            float[] vector = new float[3];
+            for (int j = 0; j < 3; j++)
+                vector[j] = -target[j] + origin[j];
+            propellerplane.setTrans(origin).setScale(0.3f);
+            propellerplane.alignWith(0, vector, true, -90);
+            ObjectAnimator anim = GLAnimatorFactoryCV.addAnimatorTrans(propellerplane, target, 10000, 0);
+            anim.setStartDelay(i * 1000);
+            glSurfaceView.addShape(propellerplane);
         }
     }
 
     public void airplanesLooping(GLSurfaceViewCV surfaceView) {
         surfaceView.clearShapes();
         // airplane 1
-        GLShapeCV airplane = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
-        airplane.setTrans(0,-3.5f,-6).setRotation(-45,0,1,0).setScale(0.25f);
+        GLShapeCV airplane = GLShapeFactoryCV.makeJetAirplane("Plane 1",GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
+        airplane.setTrans(0,-5.5f,-6).setRotation(-45,0,1,0).setScale(0.4f);
         int duration = 20000;
-        float[] axisPoint1 = {0,0,1};
-        float[] axisPoint2 = {0,0,-1};
-        GLAnimatorFactoryCV.addAnimatorArcPathAroundAxis(airplane, axisPoint1,axisPoint2,-1800,duration,0);
+        float[] axisPoint11 = {0,0,1};
+        float[] axisPoint12 = {0,0,-1};
+        GLAnimatorFactoryCV.addAnimatorArcPathAroundAxis(airplane, axisPoint11,axisPoint12,-1800,duration,0);
         GLAnimatorFactoryCV.addAnimatorRotXInModelSpace(airplane,-1800,duration,0,false);
         surfaceView.addShape(airplane);
         // airplane 2
-        airplane = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
+        /*
+        airplane = GLShapeFactoryCV.makeJetAirplane("Plane 2",GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
         airplane.setTrans(0,3.5f,-6).setRotation(45,0,1,0).setScale(0.25f);
         GLAnimatorFactoryCV.addAnimatorArcPathAroundAxis(airplane, axisPoint1,axisPoint2,-1800,duration,0) ;
         GLAnimatorFactoryCV.addAnimatorRotXInModelSpace(airplane,1800,duration,0,false);
+        surfaceView.addShape(airplane);
+        */
+        airplane = GLShapeFactoryCV.makePropellerAirplane("Plane 2",duration,30);
+        airplane.setTrans(0,3.5f,-6).setRotation(-90,0,1,0).setScale(0.25f);
+        // airplane.setTrans(0,3.5f,-6).setScale(0.25f);
+        float[] axisPoint21 = {-1,0,-4};
+        float[] axisPoint22 = {1,0,-4};
+        GLAnimatorFactoryCV.addAnimatorArcPathAroundAxis(airplane, axisPoint21,axisPoint22,1800,duration,0) ;
+        GLAnimatorFactoryCV.addAnimatorRotZInModelSpace(airplane,1800,duration,0,false);
         surfaceView.addShape(airplane);
         /*
         final int numberOfPlanes = 12;
@@ -441,131 +465,38 @@ public class ApplicationsActivity extends Activity {
     }
 
     public void birdWithFlappingWings(GLSurfaceViewCV surfaceView) {
-
-        Toast.makeText(this,"Experimental implementation - rather inefficient",Toast.LENGTH_LONG).show();
-
+        final int duration1 = 15000;
+        final int duration2 = 5000;
+        final int speed1 = 10;
+        final int speed2 = 20;
+        int startDelay2 = 0;
         surfaceView.clearShapes();
-        int numberOfParts = 9;
-        GLShapeCV[] shapes = new GLShapeCV[numberOfParts];
-        float[][] verticesWing1 = {{0,-1,0},{0,1,0},{-2,1,0}};
-        shapes[0] = GLShapeFactoryCV.makeTriangle("Wing1",verticesWing1,GLShapeFactoryCV.blue);
-        float[][] verticesWing2 = {{0,-1,0},{2,1,0},{0,1,0}};
-        shapes[1] = GLShapeFactoryCV.makeTriangle("Wing2",verticesWing2,GLShapeFactoryCV.blue);
-        shapes[2] = GLShapeFactoryCV.makeSphere("Body",3, GLShapeFactoryCV.lightblue);
-        shapes[3] = GLShapeFactoryCV.makeSphere("Head", 3, GLShapeFactoryCV.lightgreen);
-        shapes[4] = GLShapeFactoryCV.makeSphere("LeftEye", 3, GLShapeFactoryCV.red);
-        shapes[5] = GLShapeFactoryCV.makeSphere("RightEye", 3, GLShapeFactoryCV.red);
-        float[][] verticesBeak = {{0,-3f,0.3f},{0.5f,-1.5f,0.3f},{-0.5f,-1.5f,0.3f}};
-        shapes[6] = GLShapeFactoryCV.makeTriangle("BeakUpper", verticesBeak, GLShapeFactoryCV.lightred);
-        shapes[7] = GLShapeFactoryCV.makeTriangle("BeakLower", verticesBeak, GLShapeFactoryCV.lightred);
-        float[][] verticesTail = {{0,2f,0},{0.5f,3.5f,0.75f},{-0.5f,3.5f,0.75f}};
-        shapes[8] = GLShapeFactoryCV.makeTriangle("Tail", verticesTail, GLShapeFactoryCV.lightred);
-        float[][] scalingArray = new float[numberOfParts][3];
-        for (int i=0; i<numberOfParts; i++)
-            for (int j=0;j<3;j++)
-                scalingArray[i][j] = 1;
-        scalingArray[2][0] = 0.5f;
-        scalingArray[2][1] = 2;
-        scalingArray[2][2] = 0.5f;
-        scalingArray[3][0] = scalingArray[3][1] = scalingArray[3][2] = 0.5f;
-        scalingArray[4][0] = scalingArray[4][1] = scalingArray[4][2] = 0.2f;
-        scalingArray[5][0] = scalingArray[5][1] = scalingArray[5][2] = 0.2f;
-        float[][] rotationArray = new float[numberOfParts][3];
-        float[][] translationArray = new float[numberOfParts][3];
-        translationArray[2][1] = 0.5f;
-        translationArray[3][1] = -1.4f;
-        translationArray[3][2] = 0.4f;
-        translationArray[4][0] = -0.2f;
-        translationArray[4][1] = -1.65f;
-        translationArray[4][2] = 0.7f;
-        translationArray[5][0] = 0.2f;
-        translationArray[5][1] = -1.65f;
-        translationArray[5][2] = 0.7f;
-        GLShapeCV bird = GLShapeFactoryCV.joinShapes("Bird",shapes,scalingArray, rotationArray,translationArray,10);
-        float[] origin = { -7, -6, -4 };
-        float[] target = { 10, 12, -3 };
-        bird.setRotationByEulerAngles(110, 40, -70);
-        bird.setTrans(origin);
-        final int duration = 15000;
-        GLAnimatorFactoryCV.addAnimatorTrans(bird, target, duration, 0).setInterpolator(new AccelerateInterpolator());
-        GLAnimatorFactoryCV.addAnimatorRotXInModelSpace(bird,50,duration,0,false);
-        surfaceView.addShape(bird);
-        // TODO Thread-Erzeugung und -Start in eine GLAnimatorFactory-Methode auslagern, dabei stärkere Parametrisierung
-        (new Thread() {
-            public void run() {
-                int runTime = 0;
-                float[] vertexWing1 = verticesWing1[2];
-                float[] vertexWing2 = verticesWing2[1];
-                float[] vertexBeak = verticesBeak[0];
-                float[] vertexTail1 = verticesTail[1];
-                float[] vertexTail2 = verticesTail[2];
-                float stepWingsTail = 0.3f;
-                float stepBeak = 0.1f;
-                while (runTime<duration) {
-                    vertexWing1[2]+=stepWingsTail;
-                    bird.setTriangleVertex("Wing1",2,vertexWing1);
-                    vertexWing2[2]+=stepWingsTail;
-                    bird.setTriangleVertex("Wing2",1,vertexWing2);
-                    vertexTail1[2]-=stepWingsTail;
-                    bird.setTriangleVertex("Tail",1,vertexTail1);
-                    vertexTail2[2]-=stepWingsTail;
-                    bird.setTriangleVertex("Tail",2,vertexTail2);
-                    if (vertexWing1[2]>1.25f||vertexWing1[2]<-1.25f) stepWingsTail=-stepWingsTail;
-                    bird.setTriangleVertex("BeakLower",0,vertexBeak);
-                    vertexBeak[2]+=stepBeak;
-                    if (vertexBeak[2]>0.5f||vertexBeak[2]<=0.05) stepBeak=-stepBeak;
-                    try {
-                        Thread.currentThread().sleep(50);
-                        runTime += 50;
-                    } catch (Exception e) {}
-                }
-            }
-        }).start();
-
-        GLShapeCV bird2 = bird.copy("Bird 2");
-        bird2.setTrans(-4,6,-10).setRotation(-90,1,0,0);
-        // bird2.setTrans(-5,10,-10).setRotationByEulerAngles(0,45,0);
-        float[] control1 = { 30, 7, -8 };
-        float[] control2 = { -30, 4, -6 };
-        float[] target2 = { 10, 1, -4 };
-        final int duration2 = 10000;
-        int startDelay = 13000;
-        GLAnimatorFactoryCV.addAnimatorBezierPath(bird2,control1,control2,target2,1,duration2,startDelay);
+        // bird 1
+        float[] origin1 = { -6, -6, -4 };
+        float[] target1 = { 10, 12, -3 };
+        GLShapeCV bird1 = GLShapeFactoryCV.makeBird("Bird 1",duration1,speed1);
+        bird1.setRotationByEulerAngles(0, 0, -30);
+        bird1.setTrans(origin1);
+        GLAnimatorFactoryCV.addAnimatorTrans(bird1, target1, duration1, 0).setInterpolator(new AccelerateInterpolator());
+        GLAnimatorFactoryCV.addAnimatorRotZInModelSpace(bird1,-50,duration1,0,false);
+        surfaceView.addShape(bird1);
+        // bird 2
+        float[] origin2 = { -3, 6, -10 };
+        float[] target2 = { 6, -7, 0 };
+        GLShapeCV bird2 =  GLShapeFactoryCV.makeBird("Bird 2",duration2,speed2);
+        bird2.setRotationByEulerAngles(0, 45, 60);
+        bird2.setTrans(origin2);
+        GLAnimatorFactoryCV.addAnimatorTrans(bird2, target2, duration2, 0);
+        GLAnimatorFactoryCV.addAnimatorRotZInModelSpace(bird1,-50,duration1,0,false);
         surfaceView.addShape(bird2);
-        (new Thread() {
-            public void run() {
-                try {
-                    Thread.currentThread().sleep(startDelay);
-                } catch (InterruptedException e) {}
-                int runTime = 0;
-                float[] vertexWing1 = verticesWing1[2];
-                float[] vertexWing2 = verticesWing2[1];
-                float[] vertexBeak = verticesBeak[0];
-                float[] vertexTail1 = verticesTail[1];
-                float[] vertexTail2 = verticesTail[2];
-                float stepWingsTail = 0.3f;
-                float stepBeak = 0.1f;
-                while (runTime<duration2) {
-                    vertexWing1[2]+=stepWingsTail;
-                    bird2.setTriangleVertex("Wing1",2,vertexWing1);
-                    vertexWing2[2]+=stepWingsTail;
-                    bird2.setTriangleVertex("Wing2",1,vertexWing2);
-                    vertexTail1[2]-=stepWingsTail;
-                    bird2.setTriangleVertex("Tail",1,vertexTail1);
-                    vertexTail2[2]-=stepWingsTail;
-                    bird2.setTriangleVertex("Tail",2,vertexTail2);
-                    if (vertexWing1[2]>1.25f||vertexWing1[2]<-1.25f) stepWingsTail=-stepWingsTail;
-                    bird2.setTriangleVertex("BeakLower",0,vertexBeak);
-                    vertexBeak[2]+=stepBeak;
-                    if (vertexBeak[2]>0.5f||vertexBeak[2]<=0.05) stepBeak=-stepBeak;
-                    try {
-                        Thread.currentThread().sleep(50);
-                        runTime += 50;
-                    } catch (Exception e) {}
-                }
-            }
-        }).start();
-
+        // bird2.setTrans(-8,6,-10).setRotation(-90,0,-1,1);
+        // bird2.setTrans(-5,10,-10).setRotationByEulerAngles(0,45,0);
+        /*
+        float[] control1 = { 30, 10, -8 };
+        float[] control2 = { -30, 4, -6 };
+        float[] target2 = { 10, -2, -4 };
+        GLAnimatorFactoryCV.addAnimatorBezierPath(bird2,control1,control2,target2,0,duration2,startDelay2);
+         */
     }
 
     public void randomSpheres(GLSurfaceViewCV surfaceView) {

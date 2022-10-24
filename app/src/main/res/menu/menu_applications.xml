@@ -24,7 +24,7 @@
     <item
         android:id="@+id/itemBirdFlappingWings"
         android:showAsAction="never"
-        android:title="bird with flapping wings" />
+        android:title="birds with flapping wings" />
 
     <item
         android:id="@+id/itemRandomSpheres"

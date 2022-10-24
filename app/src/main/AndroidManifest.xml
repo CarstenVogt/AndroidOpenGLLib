@@ -20,6 +20,7 @@
         </activity>
         <activity android:name=".BasicShapesActivity" />
         <activity android:name=".AdvancedTechniquesActivity" />
+        <activity android:name=".ComplexObjectsActivity" />
         <activity android:name=".TouchExampleActivity" />
         <activity
             android:name=".ApplicationsActivity"

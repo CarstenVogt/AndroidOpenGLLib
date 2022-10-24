@@ -46,7 +46,6 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import de.thkoeln.cvogt.android.opengl_utilities.GLRendererCV;
 import de.thkoeln.cvogt.android.opengl_utilities.GLShapeCV;
@@ -89,19 +88,19 @@ public class RotationActivity extends Activity {
          */
         // Shape 1: Euler / cardan rotation in the model coordinate system (intrinsic coordinate system)
         // by a self-implemented formula - see method rotationMatrixFromEulerAngles_OwnFormula() below
-        shape1 = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
+        shape1 = GLShapeFactoryCV.makeJetAirplane("Plane 1",GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
         axesShape1 = GLShapeFactoryCV.makeAxes();
         // add the axes to the model coordinate system to the shape such that they will rotate together with the shape
         shape1 = GLShapeFactoryCV.joinShapes("",shape1,axesShape1,2f,2f,2f,0,0,0,0,0,0,0,0,0);
         shape1.setTrans(-1.5f,0,-1).setScale(0.25f);
         glSurfaceView.addShape(shape1);
         // Shape 2: Euler / cardan rotation by Matrix.setRotateEulerM() - faulty!
-        shape2 = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightred,GLShapeFactoryCV.red);
+        shape2 = GLShapeFactoryCV.makeJetAirplane("Plane 2",GLShapeFactoryCV.lightred,GLShapeFactoryCV.red);
         shape2.setTrans(0f,-3f,-1).setScale(0.15f);
         glSurfaceView.addShape(shape2);
         // Shape 3: rotation by a rotation matrix
         // - rotation in the fixed world coordinate space (extrinsic coordinate system)
-        shape3 = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightyellow,GLShapeFactoryCV.orange);
+        shape3 = GLShapeFactoryCV.makeJetAirplane("Plane 3",GLShapeFactoryCV.lightyellow,GLShapeFactoryCV.orange);
         axesShape3 = GLShapeFactoryCV.makeAxes();
         shape3.setTrans(1.5f,0f,-1).setScale(0.25f);
         glSurfaceView.addShape(shape3);

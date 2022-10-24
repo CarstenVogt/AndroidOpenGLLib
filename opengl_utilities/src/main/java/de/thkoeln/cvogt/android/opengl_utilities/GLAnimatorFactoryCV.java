@@ -260,10 +260,9 @@ public class GLAnimatorFactoryCV {
             if (!attributeIsValid) {
                 startRotMatrix = shape.getRotationMatrix();
                 // for debugging purposes
-                float rotAngleInit = GraphicsUtilsCV.rotAngleFrom4x4RotationMatrix(GraphicsUtilsCV.matrixFromArray(startRotMatrix,4,4));
-                float[] rotAxisInit = GraphicsUtilsCV.rotAxisFrom4x4RotationMatrix(GraphicsUtilsCV.matrixFromArray(startRotMatrix,4,4));
-                Log.v("GLDEMO","AnimatorRot: "+rotAngleInit+"  "+rotAxisInit[0]+" "+rotAxisInit[1]+" "+rotAxisInit[2]);
-                //
+                // float rotAngleInit = GraphicsUtilsCV.rotAngleFrom4x4RotationMatrix(GraphicsUtilsCV.matrixFromArray(startRotMatrix,4,4));
+                // float[] rotAxisInit = GraphicsUtilsCV.rotAxisFrom4x4RotationMatrix(GraphicsUtilsCV.matrixFromArray(startRotMatrix,4,4));
+                // Log.v("GLDEMO","AnimatorRot: "+rotAngleInit+"  "+rotAxisInit[0]+" "+rotAxisInit[1]+" "+rotAxisInit[2]);
                 attributeIsValid = true;
             }
             float currentRotAngle = f*angleToTraverse;

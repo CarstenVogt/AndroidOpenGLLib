@@ -14,11 +14,10 @@ package de.thkoeln.cvogt.android.opengl_utilities_demo;
 
 import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.opengl.Matrix;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.AccelerateInterpolator;
+
+import javax.microedition.khronos.opengles.GL;
 
 import de.thkoeln.cvogt.android.opengl_utilities.GLAnimatorFactoryCV;
 import de.thkoeln.cvogt.android.opengl_utilities.GLRendererCV;
@@ -27,7 +26,6 @@ import de.thkoeln.cvogt.android.opengl_utilities.GLShapeCV;
 import de.thkoeln.cvogt.android.opengl_utilities.GLShapeFactoryCV;
 import de.thkoeln.cvogt.android.opengl_utilities.GLSurfaceViewCV;
 import de.thkoeln.cvogt.android.opengl_utilities.GLTriangleCV;
-import de.thkoeln.cvogt.android.opengl_utilities.GraphicsUtilsCV;
 
 public class TestsActivity extends Activity {
 
@@ -40,7 +38,7 @@ public class TestsActivity extends Activity {
         super.onCreate(savedInstanceState);
         renderer = new GLRendererCV();
         glSurfaceView = new GLSurfaceViewCV(this, renderer, false);
-        makeAirplane(glSurfaceView);
+        makePropellerPlane(glSurfaceView);
         setContentView(glSurfaceView);
     }
 
@@ -56,7 +54,16 @@ public class TestsActivity extends Activity {
         glSurfaceView.onPause();
     }
 
-    public static void makeAirplane(GLSurfaceViewCV surfaceView) {
+    public static void makePropellerPlane(GLSurfaceViewCV surfaceView) {
+        surfaceView.clearShapes();
+        GLShapeCV airplane = GLShapeFactoryCV.makePropellerAirplane("Propeller Plane",10000,30);
+        airplane.setRotationByEulerAngles(10,45,0);
+        airplane.setTransZ(-5);
+        GLAnimatorFactoryCV.addAnimatorRotY(airplane,270,5000,2,true);
+        surfaceView.addShape(airplane);
+    }
+
+    public static void makeAirplaneDynamic(GLSurfaceViewCV surfaceView) {
         surfaceView.clearShapes();
         final float lengthFuselage = 7;
         final float wingspan = 12;
@@ -81,7 +88,7 @@ public class TestsActivity extends Activity {
         float[][] verticesVerticalTail = {{0,0,0.5f*lengthFuselage},{0,0,0.5f*lengthFuselage-lengthVerticalTail},{0,heightVerticalTail,0.6f*lengthFuselage}};
         GLShapeCV verticalTail = GLShapeFactoryCV.makeTriangle("Vertical Tail",verticesVerticalTail,colors[0],colors[1],10);
 
-        float yStart = 4, zStart = -10;
+        float yStart = 4, zStart = -15;
         nose.setTrans(-4,yStart,zStart);
         wings.setTrans(-2,yStart,zStart);
         fuselage.setTrans(0,yStart,zStart);
@@ -89,36 +96,35 @@ public class TestsActivity extends Activity {
         verticalTail.setTrans(4,yStart,zStart);
 
         int duration = 5000;
-        float zBase = -3;
+        float zTarget = -7;
 
         /*
-        GLAnimatorFactoryCV.addAnimatorTrans(nose,0,0,zBase-0.5f*lengthFuselage-0.5f,duration,0);
-        GLAnimatorFactoryCV.addAnimatorTrans(wings,0,0,zBase,duration,0);
-        GLAnimatorFactoryCV.addAnimatorTrans(fuselage,0,0,zBase,duration,0);
-        GLAnimatorFactoryCV.addAnimatorTrans(cockpit,0,1,zBase-0.25f*lengthFuselage,duration,0);
-        GLAnimatorFactoryCV.addAnimatorTrans(verticalTail,0,1,zBase-0.25f*lengthFuselage,duration,0);
+        GLAnimatorFactoryCV.addAnimatorTrans(nose,0,0,zTarget-0.5f*lengthFuselage-0.5f,duration,0);
+        GLAnimatorFactoryCV.addAnimatorTrans(wings,0,0,zTarget,duration,0);
+        GLAnimatorFactoryCV.addAnimatorTrans(fuselage,0,0,zTarget,duration,0);
+        GLAnimatorFactoryCV.addAnimatorTrans(cockpit,0,1,zTarget-0.25f*lengthFuselage,duration,0);
+        GLAnimatorFactoryCV.addAnimatorTrans(verticalTail,0,1,zTarget-0.25f*lengthFuselage,duration,0);
         GLAnimatorFactoryCV.addAnimatorRotX(nose,-90,duration,0,false);
         GLAnimatorFactoryCV.addAnimatorRotX(fuselage,90,duration,0,false);
         */
 
-        GLAnimatorFactoryCV.addAnimatorTrans(nose,0,0,zBase-0.5f*lengthFuselage-0.5f,duration,0);
-        GLAnimatorFactoryCV.addAnimatorTrans(wings,0,0,zBase,duration,0);
-        GLAnimatorFactoryCV.addAnimatorTrans(fuselage,0,0,zBase,duration,0);
-        GLAnimatorFactoryCV.addAnimatorTrans(cockpit,0,1,zBase-0.25f*lengthFuselage,duration,0);
-        GLAnimatorFactoryCV.addAnimatorTrans(verticalTail,0,1,zBase-0.25f*lengthFuselage,duration,0);
-        GLAnimatorFactoryCV.addAnimatorRotX(nose,-90,duration,0,false);
-        GLAnimatorFactoryCV.addAnimatorRotX(fuselage,90,duration,0,false);
-        GLAnimatorFactoryCV.addAnimatorRotY(nose,90,duration,0,false);
-        GLAnimatorFactoryCV.addAnimatorRotY(wings,90,duration,0,false);
-        GLAnimatorFactoryCV.addAnimatorRotY(fuselage,90,duration,0,false);
-        GLAnimatorFactoryCV.addAnimatorRotY(cockpit,90,duration,0,false);
-        GLAnimatorFactoryCV.addAnimatorRotY(verticalTail,90,duration,0,false);
+        GLAnimatorFactoryCV.addAnimatorTrans(nose,4f,0,zTarget,duration,0);
+        GLAnimatorFactoryCV.addAnimatorTrans(wings,0,0,zTarget,duration,0);
+        GLAnimatorFactoryCV.addAnimatorTrans(fuselage,0,0,zTarget,duration,0);
+        GLAnimatorFactoryCV.addAnimatorTrans(cockpit,1.8f,1.2f,zTarget,duration,0);
+        GLAnimatorFactoryCV.addAnimatorTrans(verticalTail,0f,1,zTarget,duration,0);
+        GLAnimatorFactoryCV.addAnimatorRotZ(nose,-90,duration,0,false);
+        GLAnimatorFactoryCV.addAnimatorRotY(wings,-90,duration,0,false);
+        GLAnimatorFactoryCV.addAnimatorRotZ(fuselage,-90,duration,0,false);
+        GLAnimatorFactoryCV.addAnimatorRotY(verticalTail,-90,duration,0,false);
 
         surfaceView.addShape(nose);
         surfaceView.addShape(wings);
         surfaceView.addShape(fuselage);
         surfaceView.addShape(cockpit);
         surfaceView.addShape(verticalTail);
+
+        surfaceView.addShape(GLShapeFactoryCV.makeAxes().setTransZ(zTarget));
 
     }
 
@@ -145,7 +151,7 @@ public class TestsActivity extends Activity {
         line3.setTrans(midpoint).setScale(250,0.1f,0.1f);
         line3.alignWith(line2);
         surfaceView.addShape(line3);
-        GLShapeCV airplane2 = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightred,GLShapeFactoryCV.red);
+        GLShapeCV airplane2 = GLShapeFactoryCV.makeJetAirplane("Plane 2",GLShapeFactoryCV.lightred,GLShapeFactoryCV.red);
         airplane2.setTrans(origin2).setScale(0.5f);
         float[] axis = {1,0,1};
         GLAnimatorFactoryCV.addAnimatorRot(airplane2,-55,axis,2000,0,false);
@@ -167,7 +173,7 @@ public class TestsActivity extends Activity {
             midpoint[i] = (target1[i]+origin1[i])/2f;
             alignmentVector[i] = -(target1[i] - origin1[i]);
         }
-        GLShapeCV airplane1 = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
+        GLShapeCV airplane1 = GLShapeFactoryCV.makeJetAirplane("Plane 1",GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
         airplane1.setTrans(origin1).setScale(0.5f);
         // airplane1.alignWith(2,alignmentVector,true,90);
         airplane1.alignWith(2,alignmentVector,false,0);
@@ -191,7 +197,7 @@ public class TestsActivity extends Activity {
             midpoint[i] = (target2[i]+origin2[i])/2f;
             alignmentVector[i] = -(target2[i]-origin2[i]);
         }
-        GLShapeCV airplane2 = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightred,GLShapeFactoryCV.red);
+        GLShapeCV airplane2 = GLShapeFactoryCV.makeJetAirplane("Plane 2",GLShapeFactoryCV.lightred,GLShapeFactoryCV.red);
         airplane2.setTrans(origin2).setScale(0.5f);
         airplane2.setRotationByEulerAngles(20,80,40);
         // airplane2.alignWith(2,alignmentVector,true,90);
@@ -207,7 +213,7 @@ public class TestsActivity extends Activity {
 
     public void testDynamicViewMatrix(GLSurfaceViewCV surfaceView) {
         surfaceView.clearShapes();
-        GLShapeCV shape = makeAirplane(GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
+        GLShapeCV shape = makeAirplaneDynamic(GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
         shape.setTrans(0,0,0).setRotation(225,0,1,0).setScale(0.3f);
         /*
         int duration = 3000;
@@ -487,7 +493,7 @@ public class TestsActivity extends Activity {
     }
     // Method to make an airplane pointing into the negative z direction, i.e. straight away from the camera
 
-    private GLShapeCV makeAirplane(float[] faceColor, float[] lineColor) {
+    private GLShapeCV makeAirplaneDynamic(float[] faceColor, float[] lineColor) {
         final float lengthFuselage = 7;
         final float wingspan = 12;
         final float heightVerticalTail = 4;

@@ -5,16 +5,14 @@
 // Technische Hochschule Köln, Germany
 // Fakultät für Informations-, Medien- und Elektrotechnik
 // carsten.vogt@th-koeln.de
-// 5.10.2022
+// 24.10.2022
 
 package de.thkoeln.cvogt.android.opengl_utilities;
 
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Class with static convenience methods to create specific shapes (i.e. objects of class <I>GLShapeCV</I>)
@@ -27,7 +25,7 @@ import java.util.Date;
  * <P><LI>Squares (uniformly colored, with two triangles of different colors, or textured)
  * <P><LI>Regular polygons (uniformly colored or with triangles of different colors)
  * </UL>
- * <P><LI>3D objects:
+ * <P><LI>3D objects (geometry):
  * <UL>
  * <P><LI>Cubes (with different forms of coloring, especially with colored edges, or with texturing, also wireframe cubes)
  * <P><LI>Cuboids (with different forms of coloring, especially with colored edges, also wireframe cuboids)
@@ -39,6 +37,12 @@ import java.util.Date;
  * <P><LI>Cones
  * <P><LI>Spheres
  * <P><LI>Hemispheres
+ * </UL>
+ * <P><LI>3D objects (real world):
+ * <UL>
+ * <P><LI>Jet airplanes
+ * <P><LI>Propeller airplanes
+ * <P><LI>Birds
  * </UL>
  * </UL>
  * <P>
@@ -356,7 +360,7 @@ public class GLShapeFactoryCV {
      * <UL>
      * <LI>n=1: color[0] is the uniform color of all faces of the cube.
      * <LI>n=6: color[0-5] define the colors of the six faces of the cube (in the order front, right, back, left, top, bottom)
-     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cube (in the order as specified by cubeTriangleNames)
+     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cube (in the order as specified by cubeTriangleIDs)
      * </UL>
      * @return The new cube. Null if 'colors' is not a valid color array (see method isValidColorsArray()) or has not a valid size (1, 6, or 12) in its first dimension or if one of the edge lengths is not larger than 0.
      */
@@ -404,7 +408,7 @@ public class GLShapeFactoryCV {
      * <UL>
      * <LI>n=1: color[0] is the uniform color of all faces of the cube.
      * <LI>n=6: color[0-5] define the colors of the six faces of the cube (in the order front, right, back, left, top, bottom)
-     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cube (in the order as specified by cubeTriangleNames)
+     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cube (in the order as specified by cubeTriangleIDs)
      * </UL>
      * @return The new cube. Null if a color array is not valid (see methods isValidColor(s)Array()) or if one of the edge lengths or the lineWidth is not larger than 0.
      */
@@ -485,7 +489,7 @@ public class GLShapeFactoryCV {
      * <UL>
      * <LI>n=1: color[0] is the uniform color of all faces of the cuboid.
      * <LI>n=6: color[0-5] define the colors of the six faces of the cuboid (in the order front, right, back, left, top, bottom)
-     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cuboid (in the order as specified by cubeTriangleNames)
+     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cuboid (in the order as specified by cubeTriangleIDs)
      * </UL>
      * @return The new cuboid. Null if 'colors' is not a valid color array (see method isValidColorsArray()) or has not a valid size (1, 6, or 12) in its first dimension or if one of the edge lengths is not larger than 0.
      */
@@ -536,7 +540,7 @@ public class GLShapeFactoryCV {
      * <UL>
      * <LI>n=1: color[0] is the uniform color of all faces of the cuboid.
      * <LI>n=6: color[0-5] define the colors of the six faces of the cuboid (in the order front, right, back, left, top, bottom)
-     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cuboid (in the order as specified by cubeTriangleNames)
+     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cuboid (in the order as specified by cubeTriangleIDs)
      * </UL>
      * @param colorLines The color of the edge lines (array of length 4).
      * @param edgeLineWidth The width of the edge lines.
@@ -794,7 +798,7 @@ public class GLShapeFactoryCV {
      * </UL>
      * The order of the triangles of the tetrahedron will be:
      * triangle 0 = base triangle, triangle 1 = front triangle (as seen from the camera), triangle 2 = right triangle, triangle 3 = left triangle.
-     * The names of the triangles will be: "Base", "Front", "Right", "Left".
+     * The IDs of the triangles will be: "Base", "Front", "Right", "Left".
      * <BR>
      * The radius of the circumsphere of the returned tetrahedron is Math.sqrt(3.0/8)
      * [see https://en.wikipedia.org/wiki/Tetrahedron#Angles_and_distances].
@@ -986,10 +990,30 @@ public class GLShapeFactoryCV {
     } */
 
     /**
+     * Make a regular ("right") prism or a cylinder of a uniform color.
+     * <BR>
+     * The base and the top will be polygons parallel to the x-z plane with y = -height/2.0f and y = height/2.0f, respectively,
+     * as constructed by trianglesForPolygon() and rotated by 90 deg around the x axis.
+     * The centers of the polygons will have the model coordinates (0.0,+/-height/2,0.0).
+     * The polygons will have circumcircles with a radius of 1.0.
+     * @param id The ID of the prism.
+     * @param noCorners The number of corners of the polygons (must be > 2). Note that for higher numbers (e.g. 64) the prism will appear as a cylinder.
+     * @param height The height of the prism (must be > 0).
+     * @param color The color of the prism. Must be a valid color definition according to the method isValidColorArray().
+     * @return The new prism. Null if one of the parameters is not valid (see above).
+     */
+
+    public static GLShapeCV makePrism(String id, int noCorners, float height, float[] color) {
+        float[][] colorArray = new float[1][];
+        colorArray[0] = color;
+        return makeFrustum(id, noCorners, 1, height, color, color, colorArray);
+    }
+
+    /**
      * Makes a sphere-like shape by iteratively transforming a double pyramid with 2*8 sides to approximate a sphere.
      * The transformation is done by splitting and adjusting the triangles of the pyramid iteratively to approximate a shape.
      * The center of the sphere will have the model coordinates (0.0,0.0,0.0) and its radius will be approximately 1.0.
-     * @param id The id of the shape.
+     * @param id The ID of the shape.
      * @param color The color of the shape.
      * @return The new shape.
      */
@@ -1002,7 +1026,7 @@ public class GLShapeFactoryCV {
      * Makes a sphere-like shape by iteratively transforming a double pyramid with 2*8 sides to approximate a sphere.
      * The transformation is done by splitting and adjusting the triangles of the pyramid iteratively to approximate a sphere.
      * The center of the sphere will have the model coordinates (0.0,0.0,0.0) and its radius will be approximately 1.0.
-     * @param id The id of the shape.
+     * @param id The ID of the shape.
      * @param iterations The number of iterations to be run (3 or 4 will yield good results with reasonable execution times).
      * @param color The color of the shape.
      * @return The new shape.
@@ -1018,7 +1042,7 @@ public class GLShapeFactoryCV {
      * Makes a sphere-like shape by iteratively transforming a double pyramid with 2*8 sides to approximate a sphere.
      * The transformation is done by splitting and adjusting the triangles of the pyramid iteratively to approximate a sphere.
      * The center of the sphere will have the model coordinates (0.0,0.0,0.0) and its radius will be approximately 1.0.
-     * @param id The id of the shape.
+     * @param id The ID of the shape.
      * @param colors The colors of the shape.
      * @return The new shape.
      */
@@ -1031,7 +1055,7 @@ public class GLShapeFactoryCV {
      * Makes a sphere-like shape by iteratively transforming a double pyramid with 2*8 sides to approximate a sphere.
      * The center of the sphere will have the model coordinates (0.0,0.0,0.0) and its radius will be approximately 1.0.
      * The transformation is done by splitting and adjusting the triangles of the pyramid iteratively to approximate a sphere.
-     * @param id The id of the shape.
+     * @param id The ID of the shape.
      * @param iterations The number of iterations to be run (3 or 4 will yield good results with reasonable execution times).
      * @param colors The colors of the shape.
      * @return The new shape.
@@ -1091,7 +1115,7 @@ public class GLShapeFactoryCV {
      * and the topmost vertex of the dome, i.e. all points within the base circle will have the y-coordinate -0.5 (in the model coordinate system)
      * and the topmost vertex will have the model coordinates (0.0, 0.5, 0.0).
      * N.B. In the current implementation, the hemisphere is hollow, i.e. has no base plane.
-     * @param id The id of the shape.
+     * @param id The ID of the shape.
      * @param iterations The number of iterations to be run (3 or 4 will yield good results with reasonable execution times).
      * @param sideColors The colors of the "dome" of the shape.
      * @return The new shape.
@@ -1145,7 +1169,7 @@ public class GLShapeFactoryCV {
     /**
      * Makes a shape consisting of cubes. All cubes have the same coloring (faces and edge lines) and unit size, i.e. edge length 1
      * and will be placed into a three-dimensional raster.
-     * @param id The id of the shape.
+     * @param id The ID of the shape.
      * @param faceColor The color of the faces of the cubes.
      * @param lineColor The color of the edge lines of the cubes.
      * @param lineWidth The width of the edge lines of the cubes.
@@ -1234,13 +1258,14 @@ public class GLShapeFactoryCV {
     }
 
     /**
-     * Makes a shape in the form of an airplane that points into the negative z direction, i.e. straight away from the camera.
+     * Makes a shape in the form of a jet airplane that points into the negative z direction, i.e. straight away from the camera.
+     * @param id The ID of the new shape.
      * @param faceColor The color of the wings, the nose, the vertical tail and some parts of the fuselage.
      * @param lineColor The color of the lines around wings and vertical tail and of some parts of the fuselage.
      * @return The new shape.
      **/
 
-    public static GLShapeCV makeAirplane(float[] faceColor, float[] lineColor) {
+    public static GLShapeCV makeJetAirplane(String id, float[] faceColor, float[] lineColor) {
         final float lengthFuselage = 7;
         final float wingspan = 12;
         final float heightVerticalTail = 4;
@@ -1276,8 +1301,227 @@ public class GLShapeFactoryCV {
         translationArray[1][2] = -0.25f*lengthFuselage;
         rotationArray[0][0] = -90;
         rotationArray[2][0] = 90;
-        GLShapeCV airplane = GLShapeFactoryCV.joinShapes("Airplane",airplaneParts,rotationArray,translationArray,0);
+        GLShapeCV airplane = GLShapeFactoryCV.joinShapes(id,airplaneParts,rotationArray,translationArray,0);
         return airplane;
+    }
+
+    /**
+     * Makes a shape in the form of a propeller plane that points into the x direction.
+     * The propeller of the airplane is optionally animated. The animation will start at once.
+     * @param animDuration If >0 the propeller will be animated for 'animDuration' milliseconds.
+     * @param animSpeed The speed of the animation, i.e. the number of animation steps per second.
+     * @return The new shape.
+     **/
+
+    public static GLShapeCV makePropellerAirplane(String id, int animDuration, int animSpeed) {
+        final float lengthFuselage = 7;
+        final float propellerthickness = 0.1f;
+        final float propellerlength = 2f;
+        final float wingspan = 12;
+        final float wingthickness = 0.15f;
+        final float wingbreadth = 2;
+        final float heightVerticalTail = 3f;
+        final float lengthVerticalTail = lengthFuselage/4.0f;
+        float[][] colors = new float[2][];
+        colors[0] = GLShapeFactoryCV.lightblue;
+        colors[1] = GLShapeFactoryCV.blue;
+        // fuselage
+        GLShapeCV fuselage = GLShapeFactoryCV.makePrism("Fuselage",16,lengthFuselage,GLShapeFactoryCV.lightgrey,GLShapeFactoryCV.lightgrey,colors);
+        // nose
+        float[][] colorFront = new float[1][];
+        colorFront[0] = colors[0];
+        GLShapeCV nose = GLShapeFactoryCV.makeHemisphere("Nose",3,colorFront);
+        // propellers
+        GLShapeCV propellerPt1 = GLShapeFactoryCV.makeCuboid("PropPart1",propellerthickness,propellerlength,propellerthickness,GLShapeFactoryCV.white);
+        GLShapeCV propellerPt2 = GLShapeFactoryCV.makeCuboid("PropPart2",propellerthickness,propellerthickness,propellerlength,GLShapeFactoryCV.white);
+        GLShapeCV propeller = GLShapeFactoryCV.joinShapes("Propeller",propellerPt1,propellerPt2);
+        // wings
+        GLShapeCV lowerWing = GLShapeFactoryCV.makeCuboid("LowerWing",wingbreadth,wingthickness,wingspan,GLShapeFactoryCV.lightblue);
+        GLShapeCV upperWing = GLShapeFactoryCV.makeCuboid("UpperWing",wingbreadth,wingthickness,wingspan,GLShapeFactoryCV.lightblue);
+        // struts between wings
+        GLShapeCV wingStrutLeft = GLShapeFactoryCV.makePrism("WingStrutLeft",10,3,GLShapeFactoryCV.lightblue);
+        GLShapeCV wingStrutRight = GLShapeFactoryCV.makePrism("WingStrutRight",10,3,GLShapeFactoryCV.lightblue);
+        // tails
+        GLShapeCV verticalTail = GLShapeFactoryCV.makeCuboid("Vertical Tail",lengthVerticalTail,heightVerticalTail,0.1f,GLShapeFactoryCV.lightblue);
+        GLShapeCV horizontalTail = GLShapeFactoryCV.makeCuboid("Horizontal Tail",lengthVerticalTail,0.1f,2*heightVerticalTail,GLShapeFactoryCV.lightblue);
+        // tail wheel
+        GLShapeCV tailWheelPart1 = GLShapeFactoryCV.makePrism("",10,12,GLShapeFactoryCV.lightblue);
+        GLShapeCV tailWheelPart2 = GLShapeFactoryCV.makePrism("",20,1,GLShapeFactoryCV.lightblue);
+        GLShapeCV tailWheel = GLShapeFactoryCV.joinShapes("TailWheel",tailWheelPart1,tailWheelPart2,3,2f,3,90,0,0,0,-4,0);
+        // right wheel
+        GLShapeCV rightWheelPart1 = GLShapeFactoryCV.makePrism("",10,16,GLShapeFactoryCV.lightblue);
+        GLShapeCV rightWheelPart2 = GLShapeFactoryCV.makePrism("",20,1,GLShapeFactoryCV.lightblue);
+        GLShapeCV rightWheel = GLShapeFactoryCV.joinShapes("RightWheel",rightWheelPart1,rightWheelPart2,3,2f,3,-45,0,0,0,-8f,1f);
+        // left wheel
+        GLShapeCV leftWheelPart1 = GLShapeFactoryCV.makePrism("",10,16,GLShapeFactoryCV.lightblue);
+        GLShapeCV leftWheelPart2 = GLShapeFactoryCV.makePrism("",20,1,GLShapeFactoryCV.lightblue);
+        GLShapeCV leftWheel = GLShapeFactoryCV.joinShapes("LeftWheel",leftWheelPart1,leftWheelPart2,3,2f,3,45,0,0,0,-8f,-1f);
+        // join all shapes
+        GLShapeCV[] airplaneParts = new GLShapeCV[12];
+        airplaneParts[0] = fuselage;
+        airplaneParts[1] = nose;
+        airplaneParts[2] = propeller;
+        airplaneParts[3] = lowerWing;
+        airplaneParts[4] = upperWing;
+        airplaneParts[5] = wingStrutLeft;
+        airplaneParts[6] = wingStrutRight;
+        airplaneParts[7] = verticalTail;
+        airplaneParts[8] = horizontalTail;
+        airplaneParts[9] = tailWheel;
+        airplaneParts[10] = rightWheel;
+        airplaneParts[11] = leftWheel;
+        float[][] scalingArray = new float[airplaneParts.length][];
+        for (int i=0;i<airplaneParts.length;i++)
+            scalingArray[i] = new float[]{1,1,1};
+        scalingArray[5] = new float[]{0.1f,1,0.1f};
+        scalingArray[6] = new float[]{0.1f,1,0.1f};
+        scalingArray[9] = new float[]{0.15f,0.15f,0.15f};
+        scalingArray[10] = new float[]{0.15f,0.15f,0.15f};
+        scalingArray[11] = new float[]{0.15f,0.15f,0.15f};
+        float[][] rotationArray = new float[airplaneParts.length][3];
+        rotationArray[0][2] = 90;
+        rotationArray[1][2] = -90;
+        rotationArray[1][1] = 90;
+        rotationArray[9][2] = -45;
+        rotationArray[10][0] = -45;
+        rotationArray[11][0] = 45;
+        float[][] translationArray = new float[airplaneParts.length][3];
+        translationArray[1][0] = 0.5f*lengthFuselage+0.5f;
+        translationArray[2][0] = 0.5f*lengthFuselage+1f+propellerthickness;
+        translationArray[3][0] = 1f;
+        translationArray[3][1] = -1;
+        translationArray[4][0] = 1f;
+        translationArray[4][1] = 2;
+        translationArray[5][0] = 1f;
+        translationArray[5][1] = 0.5f;
+        translationArray[5][2] = -wingspan/3f;
+        translationArray[6][0] = 1f;
+        translationArray[6][1] = 0.5f;
+        translationArray[6][2] = wingspan/3f;
+        translationArray[7][0] = -lengthFuselage/2.0f+0.25f;
+        translationArray[7][1] = heightVerticalTail/2.0f;
+        translationArray[8][0] = -lengthFuselage/2.0f+0.25f;
+        translationArray[9][0] = -lengthFuselage/2.0f+0.5f;
+        translationArray[9][1] = -1.25f;
+        translationArray[10][1] = -1.75f;
+        translationArray[10][2] = 1f;
+        translationArray[11][1] = -1.75f;
+        translationArray[11][2] = -1f;
+        GLShapeCV airplane = GLShapeFactoryCV.joinShapes(id,airplaneParts,scalingArray,rotationArray,translationArray,0);
+        int sleepTime = 1000/animSpeed;
+        (new Thread() {
+            public void run() {
+                int angle = 0;
+                long startTime = System.currentTimeMillis();
+                int propellersOffset = (airplaneParts[0].getNumberOfTriangles()+airplaneParts[1].getNumberOfTriangles())*9;
+                float[] propellerTriangleCoordinates = new float[airplaneParts[2].getNumberOfTriangles()*9];
+                int index=0;
+                for (GLTriangleCV propellerTriangle : airplaneParts[2].getTriangles()) {
+                    float[] triangleCoords = propellerTriangle.getVertexCoordinates();
+                    for (int j=0;j<9;j++)
+                        propellerTriangleCoordinates[index++] = triangleCoords[j];
+                }
+                while ((System.currentTimeMillis()-startTime)<animDuration) {
+                    try {
+                        Thread.currentThread().sleep(sleepTime);
+                    } catch (Exception e) {}
+                    double sin = Math.sin(angle), cos = Math.cos(angle);
+                    for (int i=0;i<propellerTriangleCoordinates.length;i++) {
+                       switch (i%3) {
+                           case 0: break;
+                           case 1: airplane.setTriangleVertexBufferEntry(propellersOffset+i,(float)(propellerTriangleCoordinates[i]*cos-propellerTriangleCoordinates[i+1]*sin)); break;
+                           case 2: airplane.setTriangleVertexBufferEntry(propellersOffset+i,(float)(propellerTriangleCoordinates[i-1]*sin+propellerTriangleCoordinates[i]*cos)); break;
+                       }
+                    }
+                    angle = (angle+10)%360;
+                }
+            }
+        }).start();
+        return airplane;
+    }
+
+    /**
+     * Makes a shape in the form of a bird that points with its beak into the x direction.
+     * The bird is optionally animated, i.e. will move its wings, tail, and beak. The animation will start at once.
+     * @param animDuration If >0 the bird will be animated for 'animDuration' milliseconds.
+     * @param animSpeed The speed of the animation, i.e. the number of animation steps per second.
+     * @return The new shape.
+     **/
+
+    public static GLShapeCV makeBird(String id, int animDuration, int animSpeed) {
+        GLShapeCV bird;
+        int numberOfParts = 9;
+        GLShapeCV[] shapes = new GLShapeCV[numberOfParts];
+        float[][] verticesWing1 = {{-1,0,0},{1,0,0},{0,0,-2}};
+        shapes[0] = GLShapeFactoryCV.makeTriangle("Wing1",verticesWing1,GLShapeFactoryCV.blue);
+        float[][] verticesWing2 = {{-1,0,0},{1,0,0},{0,0,2}};
+        shapes[1] = GLShapeFactoryCV.makeTriangle("Wing2",verticesWing2,GLShapeFactoryCV.blue);
+        shapes[2] = GLShapeFactoryCV.makeSphere("Body",3, GLShapeFactoryCV.lightblue);
+        shapes[3] = GLShapeFactoryCV.makeSphere("Head", 3, GLShapeFactoryCV.lightgreen);
+        shapes[4] = GLShapeFactoryCV.makeSphere("LeftEye", 3, GLShapeFactoryCV.red);
+        shapes[5] = GLShapeFactoryCV.makeSphere("RightEye", 3, GLShapeFactoryCV.red);
+        final float beakY = 0.3f;
+        float[][] verticesBeak = {{3f,beakY,0},{2f,beakY,0.5f},{2f,beakY,-0.5f}};
+        shapes[6] = GLShapeFactoryCV.makeTriangle("BeakUpper", verticesBeak, GLShapeFactoryCV.lightred);
+        shapes[7] = GLShapeFactoryCV.makeTriangle("BeakLower", verticesBeak, GLShapeFactoryCV.lightred);
+        final float tailtipY = 0.75f;
+        float[][] verticesTail = {{-2f,0,0},{-3.5f,tailtipY,0.5f},{-3.5f,tailtipY,-0.5f}};
+        shapes[8] = GLShapeFactoryCV.makeTriangle("Tail", verticesTail, GLShapeFactoryCV.lightred);
+        float[][] scalingArray = new float[numberOfParts][3];
+        for (int i=0; i<numberOfParts; i++)
+            for (int j=0;j<3;j++)
+                scalingArray[i][j] = 1;
+        scalingArray[2][0] = 2;
+        scalingArray[2][1] = scalingArray[2][2] = 0.5f;
+        scalingArray[3][0] = scalingArray[3][1] = scalingArray[3][2] = 0.5f;
+        scalingArray[4][0] = scalingArray[4][1] = scalingArray[4][2] = 0.2f;
+        scalingArray[5][0] = scalingArray[5][1] = scalingArray[5][2] = 0.2f;
+        float[][] rotationArray = new float[numberOfParts][3];
+        float[][] translationArray = new float[numberOfParts][3];
+        // translationArray[2][1] = 0.5f;
+        translationArray[3][0] = 1.8f;
+        translationArray[3][1] = 0.4f;
+        translationArray[4][0] = 2f;
+        translationArray[4][1] = 0.7f;
+        translationArray[4][2] = -0.2f;
+        translationArray[5][0] = 2f;
+        translationArray[5][1] = 0.7f;
+        translationArray[5][2] = 0.2f;
+        bird = GLShapeFactoryCV.joinShapes(id,shapes,scalingArray, rotationArray,translationArray,10);
+        // TODO Thread-Erzeugung und -Start in eine GLAnimatorFactory-Methode auslagern, dabei stärkere Parametrisierung
+        (new Thread() {
+            public void run() {
+                long startTime = System.currentTimeMillis();
+                float wingTailTipYAdd = 0;
+                float stepWingsTail = 0.3f;
+                float beakTipYAdd = 0;
+                float stepBeak = 0.05f;
+                int wings2Offset = shapes[0].getNumberOfTriangles()*9;
+                int beakUpperOffset = 0;
+                for (int i=0;i<6;i++)
+                    beakUpperOffset += shapes[i].getNumberOfTriangles()*9;
+                int beakLowerOffset = beakUpperOffset + shapes[6].getNumberOfTriangles()*9;
+                int tailOffset = beakLowerOffset+shapes[7].getNumberOfTriangles()*9;
+                int sleepTime = 100;
+                if (animSpeed>0) sleepTime = 1000/animSpeed;
+                while ((System.currentTimeMillis()-startTime)<animDuration) {
+                    try {
+                        Thread.currentThread().sleep(sleepTime);
+                    } catch (Exception e) {}
+                    bird.setTriangleVertexBufferEntry(7,wingTailTipYAdd);
+                    bird.setTriangleVertexBufferEntry(wings2Offset+7,wingTailTipYAdd);
+                    bird.setTriangleVertexBufferEntry(tailOffset+4,tailtipY+wingTailTipYAdd);
+                    bird.setTriangleVertexBufferEntry(tailOffset+7,tailtipY+wingTailTipYAdd);
+                    bird.setTriangleVertexBufferEntry(beakUpperOffset+1,beakY+beakTipYAdd);
+                    bird.setTriangleVertexBufferEntry(beakLowerOffset+1,beakY-beakTipYAdd);
+                    wingTailTipYAdd += stepWingsTail;
+                    if (wingTailTipYAdd>1.25f||wingTailTipYAdd<-1.25f) stepWingsTail=-stepWingsTail;
+                    beakTipYAdd += stepBeak;
+                    if (beakTipYAdd<=0||beakTipYAdd>=0.3) stepBeak=-stepBeak;
+                }
+            }
+        }).start();
+        return bird;
     }
 
     /**
@@ -1285,14 +1529,14 @@ public class GLShapeFactoryCV {
      * The shapes must have the same coloring / texturing type.
      * <BR>
      * The triangles and lines of the two shaped are taken as they are, i.e. copies of them are directly added to the new shape.
-     * @param name The name of the new shape.
+     * @param id The ID of the new shape.
      * @param shape1 The first shape to be joined.
      * @param shape2 The second shape to be joined.
      * @return The new shape.
      */
 
-    public static GLShapeCV joinShapes(String name, GLShapeCV shape1, GLShapeCV shape2) {
-        return joinShapes(name, shape1, shape2, 1, 1, 1,0, 0, 0, 0, 0, 0);
+    public static GLShapeCV joinShapes(String id, GLShapeCV shape1, GLShapeCV shape2) {
+        return joinShapes(id, shape1, shape2, 1, 1, 1,0, 0, 0, 0, 0, 0);
     }
 
     /**
@@ -1304,7 +1548,7 @@ public class GLShapeFactoryCV {
      * by modifying their vertex coordinates accordingly and then added to the new shape.
      * Afterwards, all vertex coordinates refer to the local coordinate system ("model coordinate system") of the new shape,
      * which is originally the coordinate system of the first shape.
-     * @param name The name of the new shape.
+     * @param id The ID of the new shape.
      * @param shape1 The first shape to be joined.
      * @param shape2 The second shape to be joined.
      * @param shape2_scaleX The scaling factor for the second shape - x dimension.
@@ -1319,11 +1563,11 @@ public class GLShapeFactoryCV {
      * @return The new shape.
      */
 
-    public static GLShapeCV joinShapes(String name, GLShapeCV shape1, GLShapeCV shape2,
+    public static GLShapeCV joinShapes(String id, GLShapeCV shape1, GLShapeCV shape2,
                                        float shape2_scaleX, float shape2_scaleY, float shape2_scaleZ,
                                        float shape2_rotAngleX, float shape2_rotAngleY, float shape2_rotAngleZ,
                                        float shape2_transX, float shape2_transY, float shape2_transZ) {
-        return joinShapes(name, shape1, shape2, shape2_scaleX, shape2_scaleY, shape2_scaleZ,
+        return joinShapes(id, shape1, shape2, shape2_scaleX, shape2_scaleY, shape2_scaleZ,
                 shape2_rotAngleX, shape2_rotAngleY, shape2_rotAngleZ, shape2_transX, shape2_transY, shape2_transZ, 0, 0, 0);
     }
 
@@ -1342,7 +1586,7 @@ public class GLShapeFactoryCV {
      * N.B.: If more than two shapes are combined, i.e. if this method is called multiple times with the same shape as the first
      * and different shapes as the second parameter, moveCenter_X/Y/Z should be zero in all calls except the last one,
      * i.e. the origin should be modified only once and only as the final step.
-     * @param name The name of the new shape.
+     * @param id The ID of the new shape.
      * @param shape1 The first shape to be joined.
      * @param shape2 The second shape to be joined.
      * @param shape2_scaleX The scaling factor for the second shape - x dimension.
@@ -1360,12 +1604,12 @@ public class GLShapeFactoryCV {
      * @return The new shape.
      */
 
-    public static GLShapeCV joinShapes(String name, GLShapeCV shape1, GLShapeCV shape2,
+    public static GLShapeCV joinShapes(String id, GLShapeCV shape1, GLShapeCV shape2,
                                        float shape2_scaleX, float shape2_scaleY, float shape2_scaleZ,
                                        float shape2_rotAngleX, float shape2_rotAngleY, float shape2_rotAngleZ,
                                        float shape2_transX, float shape2_transY, float shape2_transZ,
                                        float moveCenterTo_X, float moveCenterTo_Y, float moveCenterTo_Z) {
-        GLShapeCV newShape = new GLShapeCV(name,shape1.getTriangles(),shape1.getLines(),shape1.getLineWidth());
+        GLShapeCV newShape = new GLShapeCV(id,shape1.getTriangles(),shape1.getLines(),shape1.getLineWidth());
         GLTriangleCV[] triangles2 = shape2.getTriangles();
         if (triangles2!=null) {
             for (GLTriangleCV triangle : triangles2)
@@ -1387,19 +1631,19 @@ public class GLShapeFactoryCV {
      * All shapes must have the same coloring / texturing type.
      * <BR>
      * The triangles and lines of the two shaped are taken as they are, i.e. copies of them are directly added to the new shape.
-     * @param name The name of the new shape.
+     * @param id The ID  of the new shape.
      * @param shapes The shapes to be joined.
      * @param lineWidth The width of all lines in the new shape.
      * @return The new shape or null if a parameter is not valid.
      */
 
-    public static GLShapeCV joinShapes(String name, GLShapeCV[] shapes, float lineWidth) {
+    public static GLShapeCV joinShapes(String id, GLShapeCV[] shapes, float lineWidth) {
         float scalingDummy[][] = new float[shapes.length][3];
         for (int i=0;i<scalingDummy.length;i++)
             for (int j=0;j<3;j++)
                 scalingDummy[i][j] = 1;
         float nullMatrix[][] = new float[shapes.length][3];
-        return joinShapes(name,shapes,scalingDummy,nullMatrix,nullMatrix,lineWidth);
+        return joinShapes(id,shapes,scalingDummy,nullMatrix,nullMatrix,lineWidth);
     }
 
     /**
@@ -1410,7 +1654,7 @@ public class GLShapeFactoryCV {
      * by modifying their vertex coordinates accordingly and then added to the new shape.
      * By this the shapes are placed into the local coordinate system ("model coordinate system") of the new shape
      * and thus placed in relation to each others.
-     * @param name The name of the new shape.
+     * @param id The ID of the new shape.
      * @param shapes The shapes to be joined.
      * @param rotation The respective rotation angles for the shapes, specified and applied analogously to the scaling parameter.
      * @param translation The respective translation values for the shapes, specified and applied analogously to the scaling parameter.
@@ -1418,12 +1662,12 @@ public class GLShapeFactoryCV {
      * @return The new shape or null if a parameter is not valid.
      */
 
-    public static GLShapeCV joinShapes(String name, GLShapeCV[] shapes, float[][] rotation, float[][] translation, float lineWidth) {
+    public static GLShapeCV joinShapes(String id, GLShapeCV[] shapes, float[][] rotation, float[][] translation, float lineWidth) {
         float scalingDummy[][] = new float[shapes.length][3];
         for (int i=0;i<scalingDummy.length;i++)
             for (int j=0;j<3;j++)
             scalingDummy[i][j] = 1;
-        return joinShapes(name,shapes,scalingDummy,rotation,translation,lineWidth);
+        return joinShapes(id,shapes,scalingDummy,rotation,translation,lineWidth);
     }
 
     /**
@@ -1434,7 +1678,7 @@ public class GLShapeFactoryCV {
      * by modifying their vertex coordinates accordingly and then added to the new shape.
      * By this the shapes are placed into the local coordinate system ("model coordinate system") of the new shape
      * and thus placed in relation to each others.
-     * @param name The name of the new shape.
+     * @param id The ID of the new shape.
      * @param shapes The shapes to be joined.
      * @param scaling The respective scaling factors for the shapes.
      * Must be a two-dimensional array of size n*3 where n is the number of shapes.
@@ -1449,7 +1693,7 @@ public class GLShapeFactoryCV {
     // TODO Doppelte und nicht sichtbare Dreiecke löschen
     // TODO Ausführung beschleunigen (zum Beispiel, aber nicht nur, die Dreiecke der einzelnen Shapes nicht kopieren, sondern direkt übernehmen)
 
-    public static GLShapeCV joinShapes(String name, GLShapeCV[] shapes,
+    public static GLShapeCV joinShapes(String id, GLShapeCV[] shapes,
                                        float[][] scaling,
                                        float[][] rotation,
                                        float[][] translation,
@@ -1459,7 +1703,7 @@ public class GLShapeFactoryCV {
 
         GLShapeCV joinedShape = null;
         try {
-            joinedShape = new GLShapeCV(name,null);
+            joinedShape = new GLShapeCV(id,null);
             for (int i=0;i<shapes.length;i++) {
                 GLTriangleCV[] triangles = shapes[i].getTriangles();
                 if (triangles != null) {
@@ -1491,18 +1735,18 @@ public class GLShapeFactoryCV {
     }
 
    /**
-     * Names for the two triangles of a square.
+     * IDs for the two triangles of a square.
      * <UL>
      * <LI>SquareUpperLeft
      * <LI>SquareLowerRight
      * </UL>
      */
 
-    public static String squareTriangleNames[] = { "SquareUpperLeft", "SquareLowerRight" };
+    public static String squareTriangleIDs[] = { "SquareUpperLeft", "SquareLowerRight" };
 
     /** Make two triangles for a square in the x-y plane (i.e with z=0).
      * The sides of the square will be parallel to the respective axes of the underlying coordinate system.
-     * The names of the triangles will be taken from the array 'squareTriangleNames'.
+     * The IDs of the triangles will be taken from the array 'squareTriangleIDs'.
      * @param leftUpperCornerX x coordinate of the left upper corner.
      * @param leftUpperCornerY y coordinate of the left upper corner.
      * @param sideLength side length of the square.
@@ -1516,11 +1760,11 @@ public class GLShapeFactoryCV {
         vertices[0] = new float[] { leftUpperCornerX, leftUpperCornerY, 0 };
         vertices[1] = new float[] { leftUpperCornerX, leftUpperCornerY - sideLength, 0 };
         vertices[2] = new float[] { leftUpperCornerX + sideLength, leftUpperCornerY, 0 };
-        triangles[0] = new GLTriangleCV(squareTriangleNames[0], vertices);
+        triangles[0] = new GLTriangleCV(squareTriangleIDs[0], vertices);
         vertices[0] = new float[] { leftUpperCornerX + sideLength, leftUpperCornerY, 0 };
         vertices[1] = new float[] { leftUpperCornerX, leftUpperCornerY - sideLength, 0 };
         vertices[2] = new float[] { leftUpperCornerX + sideLength, leftUpperCornerY - sideLength, 0 };
-        triangles[1] = new GLTriangleCV(squareTriangleNames[1], vertices);
+        triangles[1] = new GLTriangleCV(squareTriangleIDs[1], vertices);
         return triangles;
     }
 
@@ -1530,7 +1774,7 @@ public class GLShapeFactoryCV {
      * The polygon will point upwards, i.e. its topmost vertex will have the model coordinates (0,radiusCircumcircle,0).
      * <BR>
      * The triangles will be created in counter-clockwise order from two neighboring vertices of the polygon and the center of the polygon,
-     * starting with the topmost vertex. They will have the names Triangle00, Triangle01, ..., Triangle10, ...
+     * starting with the topmost vertex. They will have the IDs Triangle00, Triangle01, ..., Triangle10, ...
      * in the order of their creation.
      * <BR>
      * The colors are specified by an array on some length n and are assigned cyclically to the triangles, i.e. triangle no. i gets color no. i%n, % being the modulo operator.
@@ -1550,7 +1794,7 @@ public class GLShapeFactoryCV {
      * The polygon will point upwards, i.e. its topmost vertex will have the model coordinates (0,radiusCircumcircle,z_const).
      * <BR>
      * The triangles will be created in counter-clockwise order from two neighboring vertices of the polygon and the center of the polygon,
-     * starting with the topmost vertex. They will have the names Triangle00, Triangle01, ..., Triangle10, ...
+     * starting with the topmost vertex. They will have the IDs Triangle00, Triangle01, ..., Triangle10, ...
      * in the order of their creation.
      * <BR>
      * The colors are specified by an array on some length n and are assigned cyclically to the triangles, i.e. triangle no. i gets color no. i%n, % being the modulo operator.
@@ -1577,12 +1821,12 @@ public class GLShapeFactoryCV {
             vertices[2][0] = pointsOnCircle[(i+1)%triangles.length][0];
             vertices[2][1] = pointsOnCircle[(i+1)%triangles.length][1];
             vertices[2][2] = z_const;
-            String name;
+            String id;
             if (i<9)
-                name = "Triangle0" + i;
+                id = "Triangle0" + i;
             else
-                name = "Triangle" + i;
-            triangles[i] = new GLTriangleCV(name, vertices,colors[i%colors.length]);
+                id = "Triangle" + i;
+            triangles[i] = new GLTriangleCV(id, vertices,colors[i%colors.length]);
             // Log.v("DEMO","Triangle "+i+": "+vertices[0][0]+","+vertices[0][1]+"  "+vertices[1][0]+","+vertices[1][1]+"  "+vertices[2][0]+","+vertices[2][1]);
         }
         return triangles;
@@ -1596,7 +1840,7 @@ public class GLShapeFactoryCV {
      * </UL>
      * The triangles will be created in clock-wise order from two neighboring vertices of the polygon and the center of the polygon.
      * <BR>
-     * The triangles will have the names Triangle00, Triangle01, ..., Triangle10, ... in the order by which their vertices have been calculated (see above).
+     * The triangles will have the IDs Triangle00, Triangle01, ..., Triangle10, ... in the order by which their vertices have been calculated (see above).
      * <BR>
      * The colors are defined by an array on some length n and are assigned cyclically to the triangles, i.e. triangle no. i gets color no. i%n, % being the modulo operator.
      * @param topCornerX See explanation above.
@@ -1619,7 +1863,7 @@ public class GLShapeFactoryCV {
      * </UL>
      * The triangles will be created in clock-wise order from two neighboring vertices of the polygon and the center of the polygon.
      * <BR>
-     * The triangles will have the names Triangle00, Triangle01, ..., Triangle10, ... in the order by which their vertices have been calculated (see above).
+     * The triangles will have the IDs Triangle00, Triangle01, ..., Triangle10, ... in the order by which their vertices have been calculated (see above).
      * <BR>
      * The colors are defined by an array on some length n and are assigned cyclically to the triangles, i.e. triangle no. i gets color no. i%n, % being the modulo operator.
      * @param topCornerX See explanation above.
@@ -1652,12 +1896,12 @@ public class GLShapeFactoryCV {
             vertices[0] = center;
             vertices[1] = corners[(i+1)%triangles.length];
             vertices[2] = corners[i];
-            String name;
+            String id;
             if (i<9)
-                name = "Triangle0" + i;
+                id = "Triangle0" + i;
             else
-                name = "Triangle" + i;
-            triangles[i] = new GLTriangleCV(name, vertices,colors[i%colors.length]);
+                id = "Triangle" + i;
+            triangles[i] = new GLTriangleCV(id, vertices,colors[i%colors.length]);
             // Log.v("DEMO","Triangle "+i+": "+vertices[0][0]+","+vertices[0][1]+"  "+vertices[1][0]+","+vertices[1][1]+"  "+vertices[2][0]+","+vertices[2][1]);
         }
         return triangles;
@@ -1749,7 +1993,7 @@ public class GLShapeFactoryCV {
     */
     
     /**
-     * Names for the twelve triangles of a cube.
+     * IDs for the twelve triangles of a cube.
      * <UL>
      * <LI>CubeFront01: legs = top side and left side of the front square of the cube
      * <LI>CubeFront02: legs = bottom side and right side of the front square of the cube
@@ -1764,7 +2008,7 @@ public class GLShapeFactoryCV {
      * </UL>
      */
 
-    public static String[] cubeTriangleNames = {
+    public static String[] cubeTriangleIDs = {
             "CubeFront01", "CubeFront02", "CubeRight01", "CubeRight02", "CubeBack01","CubeBack02",
             "CubeLeft01", "CubeLeft02", "CubeTop01", "CubeTop02", "CubeBottom01","CubeBottom02" };
 
@@ -1782,10 +2026,10 @@ public class GLShapeFactoryCV {
      * <UL>
      * <LI>n=1: color[0] is the uniform color of all faces of the cube.
      * <LI>n=6: color[0-5] define the colors of the six faces of the cube (in the order front, right, back, left, top, bottom)
-     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cube (in the order as specified by cubeTriangleNames)
+     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cube (in the order as specified by cubeTriangleIDs)
      * </UL>
      * In the second dimension, all entries must be valid color definitions (see method isValidColorArray()).
-     * @return The triangles for the cube in the order as defined by 'cubeTriangleNames'. Null if the colors parameter is not valid (see above).
+     * @return The triangles for the cube in the order as defined by 'cubeTriangleIDs'. Null if the colors parameter is not valid (see above).
      */
 
     public static GLTriangleCV[] trianglesForColoredCube(float frontLeftUpperCorner_X, float frontLeftUpperCorner_Y, float frontLeftUpperCorner_Z, float edgeLength, float[][] colors) {
@@ -1812,73 +2056,73 @@ public class GLShapeFactoryCV {
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // front face (triangle right/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // right face (triangle front/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength,  frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // right face (triangle back/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength};
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // back face (triangle right/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // back face (triangle left/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // left face (triangle back/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // left face (triangle front/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // top face (triangle left/front)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // top face (triangle right/back)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // bottom face (triangle left/front)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // bottom face (triangle right/back)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         return triangles;
  */
     }
@@ -1899,10 +2143,10 @@ public class GLShapeFactoryCV {
      * <UL>
      * <LI>n=1: color[0] is the uniform color of all faces of the cube.
      * <LI>n=6: color[0-5] define the colors of the six faces of the cube (in the order front, right, back, left, top, bottom)
-     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cube (in the order as specified by cubeTriangleNames)
+     * <LI>n=12: color[0-11] define the colors of the twelve triangles of the cube (in the order as specified by cubeTriangleIDs)
      * </UL>
      * In the second dimension, all entries must be valid color definitions (see method isValidColorArray()).
-     * @return The triangles for the cuboid in the order as defined by 'cubeTriangleNames'. Null if the colors parameter is not valid (see above).
+     * @return The triangles for the cuboid in the order as defined by 'cubeTriangleIDs'. Null if the colors parameter is not valid (see above).
      */
 
     public static GLTriangleCV[] trianglesForColoredCuboid(float frontLeftUpperCorner_X, float frontLeftUpperCorner_Y, float frontLeftUpperCorner_Z, float edgeLength_X, float edgeLength_Y, float edgeLength_Z, float[][] colors) {
@@ -1927,73 +2171,73 @@ public class GLShapeFactoryCV {
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // front face (triangle right/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // right face (triangle front/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength_X,  frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // right face (triangle back/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength_Z};
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z - edgeLength_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // back face (triangle right/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z - edgeLength_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // back face (triangle left/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z - edgeLength_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z - edgeLength_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // left face (triangle back/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z - edgeLength_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // left face (triangle front/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z - edgeLength_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // top face (triangle left/front)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // top face (triangle right/back)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // bottom face (triangle left/front)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z - edgeLength_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         tIndex++;
         // bottom face (triangle right/back)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z - edgeLength_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength_X, frontLeftUpperCorner_Y - edgeLength_Y, frontLeftUpperCorner_Z - edgeLength_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colorsLocal[tIndex]);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colorsLocal[tIndex]);
         return triangles;
     }
 
@@ -2104,84 +2348,84 @@ public class GLShapeFactoryCV {
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         colors[0] = colors[1] = colors[2] = blue;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // front face (triangle right/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         colors[0] = colors[1] = colors[2] = orange;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // right face (triangle front/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength,  frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         colors[0] = colors[1] = colors[2] = red;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // right face (triangle back/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength};
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         colors[0] = colors[1] = colors[2] = green;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // back face (triangle right/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         colors[0] = colors[1] = colors[2] = white;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // back face (triangle left/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         colors[0] = colors[1] = colors[2] = grey;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // left face (triangle back/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         colors[0] = colors[1] = colors[2] = darkgrey;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // left face (triangle front/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         colors[0] = colors[1] = colors[2] = lightgrey;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // top face (triangle left/front)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         colors[0] = colors[1] = colors[2] = yellow;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // top face (triangle right/back)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         colors[0] = colors[1] = colors[2] = purple;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // bottom face (triangle left/front)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         colors[0] = colors[1] = colors[2] = cyan;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         tIndex++;
         // bottom face (triangle right/back)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         colors[0] = colors[1] = colors[2] = magenta;
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,colors);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,colors);
         return triangles;
     }
 */
@@ -2197,7 +2441,7 @@ public class GLShapeFactoryCV {
      * @param frontLeftUpperCorner_Z The z coordinate of the frontal left upper vertex of the cube.
      * @param edgeLength The edge length of the cube.
      * @param textures The textures for the triangles. This must be an array of length 6 with the bitmaps for the cube faces in this order: front, right, back, left, top, bottom.
-     * @return The triangles for the cube in the order as defined by 'cubeTriangleNames'. Null if the textures parameter is not valid (see above).
+     * @return The triangles for the cube in the order as defined by 'cubeTriangleIDs'. Null if the textures parameter is not valid (see above).
      */
 
     public static GLTriangleCV[] trianglesForTexturedCube(float frontLeftUpperCorner_X, float frontLeftUpperCorner_Y, float frontLeftUpperCorner_Z, float edgeLength, Bitmap[] textures) {
@@ -2219,73 +2463,73 @@ public class GLShapeFactoryCV {
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord1);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord1);
         tIndex++;
         // front face (triangle right/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord2);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord2);
         tIndex++;
         // right face (triangle front/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength,  frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord1);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord1);
         tIndex++;
         // right face (triangle back/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength};
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord2);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord2);
         tIndex++;
         // back face (triangle left/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord1);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord1);
         tIndex++;
         // back face (triangle right/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord2);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord2);
         tIndex++;
         // left face (triangle back/top)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord1);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord1);
         tIndex++;
         // left face (triangle front/bottom)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord2);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord2);
         tIndex++;
         // top face (triangle left/front)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord1);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord1);
         tIndex++;
         // top face (triangle right/back)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z - edgeLength };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord2);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord2);
         tIndex++;
         // bottom face (triangle left/front)
         vertices[0] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord1);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord1);
         tIndex++;
         // bottom face (triangle right/back)
         vertices[0] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z };
         vertices[1] = new float[] { frontLeftUpperCorner_X, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
         vertices[2] = new float[] { frontLeftUpperCorner_X + edgeLength, frontLeftUpperCorner_Y - edgeLength, frontLeftUpperCorner_Z - edgeLength };
-        triangles[tIndex] = new GLTriangleCV(cubeTriangleNames[tIndex],vertices,textures[tIndex/2],uvCoord2);
+        triangles[tIndex] = new GLTriangleCV(cubeTriangleIDs[tIndex],vertices,textures[tIndex/2],uvCoord2);
         return triangles;
     }
 
@@ -2401,7 +2645,81 @@ public class GLShapeFactoryCV {
         return shape;
     }
 
+    */
 
-     */
+    /*
+    public static GLShapeCV makeBirdOld(int animDuration) {
+        GLShapeCV bird;
+        int numberOfParts = 9;
+        GLShapeCV[] shapes = new GLShapeCV[numberOfParts];
+        float[][] verticesWing1 = {{-1,0,0},{1,0,0},{0,0,-2}};
+        shapes[0] = GLShapeFactoryCV.makeTriangle("Wing1",verticesWing1,GLShapeFactoryCV.blue);
+        float[][] verticesWing2 = {{-1,0,0},{1,0,0},{0,0,2}};
+        shapes[1] = GLShapeFactoryCV.makeTriangle("Wing2",verticesWing2,GLShapeFactoryCV.blue);
+        shapes[2] = GLShapeFactoryCV.makeSphere("Body",3, GLShapeFactoryCV.lightblue);
+        shapes[3] = GLShapeFactoryCV.makeSphere("Head", 3, GLShapeFactoryCV.lightgreen);
+        shapes[4] = GLShapeFactoryCV.makeSphere("LeftEye", 3, GLShapeFactoryCV.red);
+        shapes[5] = GLShapeFactoryCV.makeSphere("RightEye", 3, GLShapeFactoryCV.red);
+        float[][] verticesBeak = {{3.5f,0.3f,0},{2f,0.3f,0.5f},{2f,0.3f,-0.5f}};
+        shapes[6] = GLShapeFactoryCV.makeTriangle("BeakUpper", verticesBeak, GLShapeFactoryCV.lightred);
+        shapes[7] = GLShapeFactoryCV.makeTriangle("BeakLower", verticesBeak, GLShapeFactoryCV.lightred);
+        float[][] verticesTail = {{-2f,0,0},{-3.5f,0.75f,0.5f},{-3.5f,0.75f,-0.5f}};
+        shapes[8] = GLShapeFactoryCV.makeTriangle("Tail", verticesTail, GLShapeFactoryCV.lightred);
+        float[][] scalingArray = new float[numberOfParts][3];
+        for (int i=0; i<numberOfParts; i++)
+            for (int j=0;j<3;j++)
+                scalingArray[i][j] = 1;
+        scalingArray[2][0] = 2;
+        scalingArray[2][1] = scalingArray[2][2] = 0.5f;
+        scalingArray[3][0] = scalingArray[3][1] = scalingArray[3][2] = 0.5f;
+        scalingArray[4][0] = scalingArray[4][1] = scalingArray[4][2] = 0.2f;
+        scalingArray[5][0] = scalingArray[5][1] = scalingArray[5][2] = 0.2f;
+        float[][] rotationArray = new float[numberOfParts][3];
+        float[][] translationArray = new float[numberOfParts][3];
+        // translationArray[2][1] = 0.5f;
+        translationArray[3][0] = 1.8f;
+        translationArray[3][1] = 0.4f;
+        translationArray[4][0] = 2f;
+        translationArray[4][1] = 0.7f;
+        translationArray[4][2] = -0.2f;
+        translationArray[5][0] = 2f;
+        translationArray[5][1] = 0.7f;
+        translationArray[5][2] = 0.2f;
+        bird = GLShapeFactoryCV.joinShapes("Bird",shapes,scalingArray, rotationArray,translationArray,10);
+        // TODO Thread-Erzeugung und -Start in eine GLAnimatorFactory-Methode auslagern, dabei stärkere Parametrisierung
+        (new Thread() {
+            public void run() {
+                long startTime = System.currentTimeMillis();
+                float stepWingsTail = 0.3f;
+                float stepBeak = 0.05f;
+                String[] animatedTriangles = { "Wing1", "Wing2", "BeakUpper", "BeakLower", "Tail", "Tail" };
+                int[] vertexNos = { 2, 2, 0, 0, 1, 2 };
+                float[][] vertexValues = new float[6][3];
+                vertexValues[0] = verticesWing1[2].clone();
+                vertexValues[1] = verticesWing2[2].clone();
+                vertexValues[2] = verticesBeak[0].clone();
+                vertexValues[3] = verticesBeak[0].clone();
+                vertexValues[4] = verticesTail[1].clone();
+                vertexValues[5] = verticesTail[2].clone();
+                bird.setTriangleVertices(animatedTriangles,vertexNos,vertexValues);
+                while ((System.currentTimeMillis()-startTime)<20000) {
+                    try {
+                        Thread.currentThread().sleep(50);
+                    } catch (Exception e) {}
+                    vertexValues[0][1]+=stepWingsTail;
+                    vertexValues[1][1]+=stepWingsTail;
+                    vertexValues[4][1]-=stepWingsTail;
+                    vertexValues[5][1]-=stepWingsTail;
+                    if (vertexValues[0][1]>1.25f||vertexValues[0][1]<-1.25f) stepWingsTail=-stepWingsTail;
+                    vertexValues[2][1]+=stepBeak;
+                    vertexValues[3][1]-=stepBeak;
+                    if (vertexValues[2][1]>0.5f||vertexValues[2][1]<=0.05f) stepBeak=-stepBeak;
+                    bird.setTriangleVertices(vertexValues);
+                }
+            }
+        }).start();
+        return bird;
+    }
+   */
 
 }

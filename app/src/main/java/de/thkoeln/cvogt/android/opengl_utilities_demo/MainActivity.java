@@ -28,6 +28,7 @@ public class MainActivity extends ListActivity {
     String[] demos = {
             "Basic Shapes",
             "Advanced Techniques",
+            "Complex Objects",
             "Applications",
             "--- Tests and Experiments" };
 
@@ -55,6 +56,8 @@ public class MainActivity extends ListActivity {
                 startActivity(new Intent(this, BasicShapesActivity.class)); break;
             case "Advanced Techniques":
                 startActivity(new Intent(this, AdvancedTechniquesActivity.class)); break;
+            case "Complex Objects":
+                startActivity(new Intent(this, ComplexObjectsActivity.class)); break;
             case "Applications":
                 startActivity(new Intent(this, ApplicationsActivity.class)); break;
             case "--- Tests and Experiments":

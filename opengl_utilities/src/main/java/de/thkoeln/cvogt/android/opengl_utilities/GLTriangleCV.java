@@ -461,6 +461,7 @@ public class GLTriangleCV {
      */
 
     public void transform(float scaleX, float scaleY, float scaleZ, float rotAngleX ,float rotAngleY ,float rotAngleZ, float transX, float transY, float transZ) {
+        if (scaleX==1&&scaleY==1&&scaleZ==1&&rotAngleX==0&&rotAngleY==0&&rotAngleZ==0&&transX==0&&transY==0&&transZ==0) return;
         float[] transformationMatrix = new float[16];
         Matrix.setIdentityM(transformationMatrix,0);
         // scaling matrix

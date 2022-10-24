@@ -274,6 +274,7 @@ public class GLShapeCV {
                 if (triangles[i] != null)
                     this.triangles[i] = triangles[i].clone();
         }
+        colorArrayOfTriangles = null;
 
         // set the lines building this shape
 
@@ -291,7 +292,7 @@ public class GLShapeCV {
         animators = new ArrayList<Animator>();
 
         // set the model matrix from the scaling, translation, and rotation attributes
-        // and the buffers from with the coordinates and color values will be transferred to the hardware
+        // and the buffers from which the coordinates and color values will be transferred to the hardware
 
         setModelMatrixAndBuffers();
 
@@ -308,9 +309,8 @@ public class GLShapeCV {
     }
 
     /**
-     * Auxiliary method to set the model matrix and the buffers based on the triangles and lines of this shape.
-     * Must be called when the set of triangles is initialized (i.e. from an GLShapeCV constructor)
-     * or changes (i.e. from the methods addTriangle(), addTriangles(), setTriangleVertex(), and moveCenterTo())
+     * Internal auxiliary method to set the model matrix and the buffers based on the triangles and lines of this shape.
+     * Must be called when the set of triangles or lines is initialized or modified.
      */
 
     synchronized private void setModelMatrixAndBuffers() {
@@ -397,6 +397,10 @@ public class GLShapeCV {
             //     Log.v("DEMO","--------- "+lineColors[i*4]+" "+lineColors[i*4+1]+" "+lineColors[i*4+2]+" "+lineColors[i*4+3]+" ");
             lineColorsBuffer.position(0);
         }
+
+        // long duration = System.nanoTime() - start;
+        // Log.v("GLDEMO",">>> Put buffers: "+duration+" ns");
+        // Log.v("GLDEMO",">>> Put Buffers: "+duration/1000000+" ms");
 
     }
 
@@ -514,6 +518,16 @@ public class GLShapeCV {
     }
 
     /**
+     * Returns the number of triangles that belong to the shape.
+     * @return The number of triangles.
+     */
+
+    synchronized public int getNumberOfTriangles() {
+        if (triangles==null) return 0;
+        return triangles.length;
+    }
+
+    /**
      * Adds a triangle to the shape.
      * @param newTriangle The triangle to be added.
      */
@@ -546,6 +560,7 @@ public class GLShapeCV {
                 triangles = (GLTriangleCV[]) newTriangles.clone();
               else
                 triangles = newTriangles;
+            colorArrayOfTriangles = null;
             setModelMatrixAndBuffers();
             return;
         }
@@ -558,17 +573,16 @@ public class GLShapeCV {
               else
                 newTriangleAttribute[triangles.length+i] = newTriangles[i];
         triangles = newTriangleAttribute;
+        colorArrayOfTriangles = null;
         setModelMatrixAndBuffers();
     }
 
     /**
      * Sets the values of a vertex of a triangle of the shape.
-     * TODO In the current implementation, the model matrix and buffers are updated each time this method is called.
-     * This is very inefficient if multiple triangle vertices are modified directly on after the other e.g. in a morphing animation.
-     * The code should be adapted accordingly such that there will be only one update operation.
+     * If multiple vertices shall be set, the method setTriangleVertices() should be used in order to avoid multiple costly updates of the shape buffers.
      * @param triangleID The ID of the triangle.
      * @param vertexNo The number of the triangle vertex (0, 1, or 2).
-     * @param values the new coordinate values of the triangle (x, y, and z).
+     * @param values the new coordinate values of the triangle vertex (x, y, and z).
      * @return true if the operation was successful; false if there is no triangle with such ID or one of the two other parameters is not correct.
      */
 
@@ -583,6 +597,40 @@ public class GLShapeCV {
     }
 
     /**
+     * Sets the values of some triangle vertices of a shape.
+     * @param triangleIDs The IDs of the affected triangles.
+     * @param vertexNos vertexNos[i] = the number of the vertex of triangle[i] that shall be set (0, 1, or 2).
+     * @param values values[i][] = the new coordinate values for this vertex (x, y, and z).
+     */
+
+    synchronized public void setTriangleVertices(String[] triangleIDs, int[] vertexNos, float[][] values) {
+        for (int i=0;i<triangleIDs.length;i++)
+            for (GLTriangleCV triangle : triangles)
+                if (triangle.getId().equals(triangleIDs[i])) {
+                    triangle.setVertex(vertexNos[i], values[i]);
+                }
+        setModelMatrixAndBuffers();
+    }
+
+    /**
+     * Sets a vertex coordinate entry in the triangleVertexBuffer and consequently also in the GPU hardware.
+     * The GLTriangleCV objects constituting the shape, i.e. the entries of the triangles[], are not affected.
+     * Therefore, this method should be used with care.
+     * It is primarily intended for animators that animate vertices in the model coordinate space.
+     * @param index The index of the entry to be modified.
+     * @param value The new value for the entry.
+     */
+
+    public synchronized void setTriangleVertexBufferEntry(int index, float value) {
+        try {
+            triangleVerticesBuffer.position(index);
+            triangleVerticesBuffer.put(value);
+            triangleVerticesBuffer.position(0);
+        } catch (Exception e) {}
+    }
+
+
+    /**
      * Gets an array with copies of all lines of the shape.
      * @return The array with the lines.
      */
@@ -593,6 +641,16 @@ public class GLShapeCV {
         for (int i=0; i<lines.length; i++)
             linesCopy[i] = lines[i].clone();
         return linesCopy;
+    }
+
+    /**
+     * Returns the number of lines that belong to the shape.
+     * @return The number of lines.
+     */
+
+    synchronized public int getNumberOfLines() {
+        if (lines==null) return 0;
+        return lines.length;
     }
 
     /**
@@ -1504,16 +1562,22 @@ public class GLShapeCV {
         return coordinateArray;
     }
 
+    /** Auxiliary variable that specifies the colors of all triangles */
+
+    private float[] colorArrayOfTriangles;
+
     /** Auxiliary method to get a one-dimensional float array with the vertex colors of the triangles */
 
     synchronized private float[] colorArrayFromTriangles() {
-        float colorArray[] = new float[triangles.length * 12];
+        if (colorArrayOfTriangles!=null)
+            return colorArrayOfTriangles;
+        colorArrayOfTriangles = new float[triangles.length*12];
         for (int i = 0; i < triangles.length; i++)      // all triangles
             for (int j = 0; j < 3; j++)    // all vertices of a triangle
                 for (int k = 0; k < 4; k++) {   // RGBA values of a vertex
-                    colorArray[i * 12 + j * 4 + k] = triangles[i].getVertexColor(j)[k];
+                    colorArrayOfTriangles[i * 12 + j * 4 + k] = triangles[i].getVertexColor(j)[k];
                 }
-        return colorArray;
+        return colorArrayOfTriangles;
     }
 
     /** Auxiliary method to get a one-dimensional float array with the colors of the lines */

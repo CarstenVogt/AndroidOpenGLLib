@@ -351,7 +351,7 @@ public class AdvancedTechniquesActivity extends Activity {
             midpoint[i] = (target1[i]+origin1[i])/2f;
             alignmentVector[i] = target1[i] - origin1[i];
         }
-        GLShapeCV airplane1 = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
+        GLShapeCV airplane1 = GLShapeFactoryCV.makeJetAirplane("Plane 1",GLShapeFactoryCV.lightblue,GLShapeFactoryCV.blue);
         airplane1.setTrans(origin1).setScale(0.5f);
         airplane1.alignWith(2,alignmentVector,true,-33);
         int initDelay = 500;
@@ -371,7 +371,7 @@ public class AdvancedTechniquesActivity extends Activity {
             midpoint[i] = (target2[i]+origin2[i])/2f;
             alignmentVector[i] = -(target2[i]-origin2[i]);
         }
-        GLShapeCV airplane2 = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightred,GLShapeFactoryCV.red);
+        GLShapeCV airplane2 = GLShapeFactoryCV.makeJetAirplane("Plane 2",GLShapeFactoryCV.lightred,GLShapeFactoryCV.red);
         airplane2.setTrans(origin2).setScale(0.5f);
         // airplane2.setRotationByEulerAngles(GLSceneFactoryCV.randDegree(),GLSceneFactoryCV.randDegree(),GLSceneFactoryCV.randDegree());
         int durAlign = 2000;
@@ -399,7 +399,7 @@ public class AdvancedTechniquesActivity extends Activity {
         GLShapeCV airplanes[] = new GLShapeCV[4];
         float[] pos = {3,2,-4};
         for (int i=0;i<4;i++) {
-            airplanes[i] = GLShapeFactoryCV.makeAirplane(GLShapeFactoryCV.lightgreen,GLShapeFactoryCV.darkgreen);
+            airplanes[i] = GLShapeFactoryCV.makeJetAirplane("Plane "+i,GLShapeFactoryCV.lightgreen,GLShapeFactoryCV.darkgreen);
             airplanes[i].setTrans(pos).setScale(0.2f);
             pos[0] -= 2f;
             switch (i) {

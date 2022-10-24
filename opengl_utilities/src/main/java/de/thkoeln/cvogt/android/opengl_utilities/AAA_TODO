@@ -1,16 +1,14 @@
 Todos / Erweiterungen:
 - Morphing = animierte Veränderung der Koordinaten einzelner Dreiecke eines Shapes
   > Animatoren für die Klasse GLTriangleCV definieren mit Änderung der Koordinaten im Model Space
-  > mit Hilfe der Methode GLShapeCV.setTriangleVertex()
-    > eine zweite entsprechende Methode schreiben mit nur einem Parameter, die von einem ObjectAnimator aufgerufen werden kann
-  > alternativ: statt eines ObjectAnimators einen "normalen" Thread schreiben, der periodisch setTriangleVertex() aufruft
-    > siehe ApplicationsActivity.birdWithFlappingWings()
-    > hier aber: Code optimieren, so dass die Anzahl der Updates reduziert wird - siehe Kommentar zu GLShapeCV.setTriangleVertex()
+    > damit insgesamt eine zweistufige Animation:
+      > Animation des Gesamt-Shapes im World Coordinate Space (= Änderung der Model Matrix des Shapes)
+      > Animation von Teilen des Shapes im Model Coordinate Space
+    > insbesondere Animationen von Teil-Shapes: siehe joinShapes() / componentShapes
+  > aktuell als temporäre Lösung: Thread, der periodisch setTriangleVertexBufferEntry() aufruft
+    > siehe GLShapeFactory.makeBird(), .makePropellerPlane()
 - GraphicsUtilsCV:
   > Euler-Rotation: evtl. Reihenfolge der Rotationen ändern (zur Zeit X>Z>Y; alternativ X>Y>Z)
-- Klasse Shape:
-  > changeColor-Methode mit HashMap-Parameter, der Farben auf Farben abbildet:
-    In allen Dreiecken und Linien wird eine Key-Farbe durch die zugehörige Value-Farbe ersetzt.
 - Shapes
   > Quadrate und Polygone mit Umrandungslinien (analog zu Dreiecken)
   > Spiegelung von Shapes beim Kopieren
@@ -28,6 +26,8 @@ Todos / Erweiterungen:
     > z.B. Spheres: Dreiecke/Dreieckskoordinaten nach erstmaliger Berechnung cachen, bei Erzeugung weiterer Kugeln darauf zugreifen
                     (Beschleunigung ist allerdings nicht übermäßig groß, z.B. 124 ms ggü. 167 ms)
     > z.B. Triangles: nicht Farbdefinition selbst speichern, sondern Referenz darauf
+  > changeColor-Methode mit HashMap-Parameter, der Farben auf Farben abbildet:
+    In allen Dreiecken und Linien wird eine Key-Farbe durch die zugehörige Value-Farbe ersetzt.
 - Zusammenstellen von Shapes und Szenen mit mehreren Shapes
   > per Drag&Drop
   > joinShapes():
@@ -35,6 +35,7 @@ Todos / Erweiterungen:
       > dort die Shapes speichern, aus denen der neue Shape zusammengesetzt wird
       > somit: Shape kann später wieder in seine Einzelteile zerlegt werden,
          die dann wieder einzeln animiert werden können etc.
+      > auch Animationen dieser Teil-Shapes / Morphing im Model Coordinate Space
     > Ausführungszeit beschleunigen!!
     > nicht sichtbare und doppelte Dreiecke löschen
   > Aneinander"kleben" zweier Shapes bei bestimmten Dreiecken / Flächen
@@ -52,9 +53,6 @@ Todos / Erweiterungen:
     > siehe z.B. prototypische Methode initCubeConsistingOfFourTetrahedra() in OthersActivity.java, Module app.
   > auch möglich: Aufbau von Szenen / Figuren aus einzelnen Points, deren Koordinaten und Farbwerte in einem einzigen Buffer hintereinander gespeichert sind
     > Brothaler, OpenGL ES 2 for Android, p. 193 ff ("Particles")
-- in GLShapeFactoryCV.joinShapes() das Zentrum (d.h. Modellkoordinate (0,0,0)) automatisch setzen:
-    z.B. Mittelwert aller Eckpunkte nehmen
-    oder als Mittel der Schwerpunkte der einzelnen Shapes gewichtet mit deren Volumina
 - Shader für Shapes, in denen alle Dreiecke dieselbe einheitliche Farbe und keinen Farbverlauf haben
   > Zeitersparnis ??? (siehe Kommentar in GLPlatformCV)
 - Zeichnen effizienter gestalten, um Szenen mit vielen Shapes ruckelfrei darstellen zu können
